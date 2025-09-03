@@ -1,0 +1,14 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#F3F4F6"/>
+  <!-- Athletic figure -->
+  <path d="M200 75C213.807 75 225 63.8071 225 50C225 36.1929 213.807 25 200 25C186.193 25 175 36.1929 175 50C175 63.8071 186.193 75 200 75Z" fill="#2563EB"/>
+  <path d="M225 100H175L150 275H250L225 100Z" fill="#2563EB"/>
+  <path d="M175 100L150 275H175L200 150L225 275H250L225 100H175Z" fill="#1D4ED8"/>
+  <!-- Dumbbell -->
+  <rect x="125" y="125" width="50" height="20" rx="10" fill="#4B5563"/>
+  <rect x="225" y="125" width="50" height="20" rx="10" fill="#4B5563"/>
+  <rect x="175" y="130" width="50" height="10" rx="5" fill="#374151"/>
+  <!-- Motion lines -->
+  <path d="M125 165L150 165" stroke="#9CA3AF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M250 165L275 165" stroke="#9CA3AF" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,35 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7B2CBF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#4A90E2" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg-gradient)" rx="20"/>
+
+  <!-- Abstract shapes -->
+  <circle cx="200" cy="150" r="80" fill="#7B2CBF" fill-opacity="0.1"/>
+  <circle cx="600" cy="450" r="100" fill="#4A90E2" fill-opacity="0.1"/>
+  
+  <!-- Decorative lines -->
+  <path d="M100 300 Q 400 100 700 300" stroke="#7B2CBF" stroke-width="2" stroke-opacity="0.2" fill="none"/>
+  <path d="M100 350 Q 400 550 700 350" stroke="#4A90E2" stroke-width="2" stroke-opacity="0.2" fill="none"/>
+
+  <!-- Central icon -->
+  <g transform="translate(350,250)">
+    <rect x="-40" y="-40" width="180" height="180" rx="20" fill="#7B2CBF" fill-opacity="0.1"/>
+    <path d="M0 0 L100 0 L50 100 Z" fill="#4A90E2" fill-opacity="0.3"/>
+    <circle cx="50" cy="50" r="30" stroke="#7B2CBF" stroke-width="4" fill="none"/>
+  </g>
+
+  <!-- Dots pattern -->
+  <g fill="#4A90E2" fill-opacity="0.2">
+    <circle cx="100" cy="100" r="4"/>
+    <circle cx="150" cy="100" r="4"/>
+    <circle cx="200" cy="100" r="4"/>
+    <circle cx="600" cy="500" r="4"/>
+    <circle cx="650" cy="500" r="4"/>
+    <circle cx="700" cy="500" r="4"/>
+  </g>
+</svg>

@@ -1,0 +1,852 @@
+{
+	"info": {
+		"_postman_id": "6a1a4165-f046-411a-89db-2c38fe203f65",
+		"name": "magic-store",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "36631178"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "user",
+					"item": [
+						{
+							"name": "check-email",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"developoer00@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{url}}/auth/check-email"
+							},
+							"response": []
+						},
+						{
+							"name": "register",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": {
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"key": "x-api-key"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\" : \"Yousef\",\r\n    \"email\" : \"developoer00@gmail.com\",\r\n    \"phone\" : \"+201023261487\",\r\n    \"password\" : \"Yousef123@\",\r\n    \"role\" : \"user\"\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/register"
+							},
+							"response": []
+						},
+						{
+							"name": "verify-email",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": {
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"key": "x-api-key"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"developoer00@gmail.com\",\r\n    \"verificationCode\" : \"415317\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/verify-email"
+							},
+							"response": []
+						},
+						{
+							"name": "login",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": {
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"key": "x-api-key"
+									}
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"developoer00@gmail.com\",\r\n    \"password\" : \"Yousef123@\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/login"
+							},
+							"response": []
+						},
+						{
+							"name": "reset-password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"yousefabdallah55464@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/reset-password"
+							},
+							"response": []
+						},
+						{
+							"name": "verify-reset-code",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEzOTdmYjQyYTMyNzg4YmQzZWQ0ZGQiLCJpYXQiOjE3NTU1NTI0NzIsImV4cCI6MTc1NTU1OTY3Mn0.jSepe7LKOrn1k4DMhaYivwVtEzWrUzY6MorMRjkRNQE"
+									}
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"yousefabdallah55464@gmail.com\",\r\n    \"code\" : \"765999\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/verify-reset-code"
+							},
+							"response": []
+						},
+						{
+							"name": "update-profile",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwODQ4Y2JkZjA3NDljOTcwYzAyOWIiLCJpYXQiOjE3NTUzNTI0NTAsImV4cCI6MTc1NTM1OTY1MH0.9qj-cr0yHW7lz2LE7hj0g7VCku_EEcgXCJbBe2CVuxg"
+									}
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\" : \"Yousef Abdallah\",\r\n    \"phone\" : \"+201503184184\",\r\n    \"address\" : \"10 ST Maadi\",\r\n    \"country\" : \"Egypt\",\r\n    \"city\" : \"Cairo\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/update-profile"
+							},
+							"response": []
+						},
+						{
+							"name": "change-photo",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEzOTdmYjQyYTMyNzg4YmQzZWQ0ZGQiLCJpYXQiOjE3NTU1NTE5MDMsImV4cCI6MTc1NTU1OTEwM30.WE4Xxjfymk9fMwKnIuqlPNbA4cYxa4znNoDe9-SO_s0"
+									}
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "postman-cloud:///1f04d25b-a6ea-4ef0-bdce-1a78ccc849ad"
+										}
+									]
+								},
+								"url": "{{URI}}/auth/change-photo"
+							},
+							"response": []
+						},
+						{
+							"name": "update-password",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"yousefabdallah55464@gmail.com\",\r\n    \"newPassword\" : \"Yousef123#\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/update-password"
+							},
+							"response": []
+						},
+						{
+							"name": "delete-photo",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGEwODQ4Y2JkZjA3NDljOTcwYzAyOWIiLCJpYXQiOjE3NTUzODE2ODIsImV4cCI6MTc1NTM4ODg4Mn0.S2NS-HwV830tGk0XVVMTNwGySZ-FBx1LhHSUJB8O3Ec"
+									}
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text"
+									}
+								],
+								"url": "{{URI}}/auth/delete-photo"
+							},
+							"response": []
+						},
+						{
+							"name": "my-profile",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": {
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"key": "x-api-key"
+									}
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": "{{URI}}/auth/my-profile"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "admin",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"magic.admin@gmail.com\",\r\n    \"password\" : \"Yousef123@\"\r\n}\r\n\r\n\r\n// {\r\n//     \"email\": \"vendor@gmail.com\",\r\n//     \"password\": \"Joe123!\"\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/admin/login"
+							},
+							"response": []
+						},
+						{
+							"name": "add-user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\" : \"Yousef Abdallah\",\r\n    \"email\" : \"vendor@gmail.com\",\r\n    \"phone\" : \"+9664782324\",\r\n    \"password\" : \"Joe123!\",\r\n    \"role\" : \"vendor\"\r\n\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/admin/add-user"
+							},
+							"response": []
+						},
+						{
+							"name": "get-users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/auth/admin/get-users"
+							},
+							"response": []
+						},
+						{
+							"name": "get-user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/auth/admin/get-user/68a397fb42a32788bd3ed4dd"
+							},
+							"response": []
+						},
+						{
+							"name": "update-user",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\" : \"Joe\",\r\n    \"phone\" : \"+966123456789\",\r\n    \"password\" : \"Yousef123@\",\r\n    \"role\" : \"user\",\r\n    \"address\" : \"18th madi\",\r\n    \"country\" : \"Egypt\",\r\n    \"city\" : \"Cairo\",\r\n    \"isActive\" : true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/auth/admin/get-user/68a397fb42a32788bd3ed4dd"
+							},
+							"response": []
+						},
+						{
+							"name": "update-photo",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaee-8a4d-44a0-bcb5-ef1525a9459b"
+										}
+									]
+								},
+								"url": "{{URI}}/auth/admin/user-photo/68a85337abd15b3c39f4e660"
+							},
+							"response": []
+						},
+						{
+							"name": "delete-user",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{URI}}/auth/admin/get-user/68a3b34bb55d9ab1f14396bd"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "categories",
+			"item": [
+				{
+					"name": "main-category",
+					"item": [
+						{
+							"name": "add-category",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\" : {\r\n        \"ar\" : \"رقمي\",\r\n        \"en\" : \"Degital\"\r\n    },\r\n    \"description\" : {\r\n        \"ar\" : \"هو منتج ملموس يمكنك لمسه واستلامه بشكل فعلي بعد الشراء، مثل الملابس أو الأجهزة أو الكتب\",\r\n        \"en\" : \"A tangible item that you can touch and receive physically after purchase, such as clothing, electronics, or books.\"\r\n    },\r\n    \"type\" : \"physical\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/category"
+							},
+							"response": []
+						},
+						{
+							"name": "get-categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/category"
+							},
+							"response": []
+						},
+						{
+							"name": "get-category",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/category/68aa2f4ba33f1292acaf1517"
+							},
+							"response": []
+						},
+						{
+							"name": "update-category",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\" : {\r\n        \"ar\" : \"مادي\",\r\n        \"en\" : \"Physical\"\r\n    },\r\n    \"description\" : {\r\n        \"ar\" : \"هو منتج ملموس يمكنك لمسه واستلامه بشكل فعلي بعد الشراء، مثل الملابس أو الأجهزة أو الكتب\",\r\n        \"en\" : \"A tangible item that you can touch and receive physically after purchase, such as clothing, electronics, or books.\"\r\n    },\r\n    \"type\" : \"physical\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/category/68aa2f4ba33f1292acaf1517"
+							},
+							"response": []
+						},
+						{
+							"name": "delete-category",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{URI}}/category/68aa2f4ba33f1292acaf1517"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "subcategory",
+					"item": [
+						{
+							"name": "add-subcategory",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\" : {\r\n        \"en\" : \"Windows\",\r\n        \"ar\" : \"ويندوز\"\r\n    },\r\n    \"category\" : \"68b1b3056c77ba0a64e958a4\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/subcategory"
+							},
+							"response": []
+						},
+						{
+							"name": "get-subcategories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/subcategory"
+							},
+							"response": []
+						},
+						{
+							"name": "get-subcategory",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{URI}}/subcategory/68aa345e0fd752ccd47244c1"
+							},
+							"response": []
+						},
+						{
+							"name": "update-subcategory",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\" : {\r\n        \"en\" : \"Electronics\",\r\n        \"ar\" : \"الكترونيات\"\r\n    }, \r\n    \"category\" : \"68aa34410fd752ccd47244bc\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{URI}}/subcategory/68aa345e0fd752ccd47244c1"
+							},
+							"response": []
+						},
+						{
+							"name": "delete-subcategory",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{URI}}/subcategory/68aa345e0fd752ccd47244c1"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "add-product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "{ \"en\": \"Windwos 11\", \"ar\": \"ويندوز 11\" }",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "{ \"en\": \"description of product one\", \"ar\": \"وصف المنتج الأول\" }",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "68b1b3056c77ba0a64e958a4",
+									"type": "text"
+								},
+								{
+									"key": "subcategory",
+									"value": "68b1b3496c77ba0a64e958aa",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "600",
+									"type": "text"
+								},
+								{
+									"key": "priceAfterDiscount",
+									"value": "400",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "20",
+									"type": "text"
+								},
+								{
+									"key": "colors",
+									"value": "[]",
+									"type": "text"
+								},
+								{
+									"key": "size",
+									"value": "[]",
+									"type": "text"
+								},
+								{
+									"key": "codes",
+									"value": "[\"code1\" , \"code2\" ,\"code3\" , \"code4\"]",
+									"type": "text"
+								},
+								{
+									"key": "isDigital",
+									"value": "false",
+									"type": "text"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": "postman-cloud:///1f04d25b-a6ea-4ef0-bdce-1a78ccc849ad"
+								},
+								{
+									"key": "",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": "{{url}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "get-products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/products?min=200&max=900&search=Windwos&category=68b1b3056c77ba0a64e958a4&subcategory=68b1b3496c77ba0a64e958aa&lang=en",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "min",
+									"value": "200"
+								},
+								{
+									"key": "max",
+									"value": "900"
+								},
+								{
+									"key": "search",
+									"value": "Windwos"
+								},
+								{
+									"key": "category",
+									"value": "68b1b3056c77ba0a64e958a4"
+								},
+								{
+									"key": "subcategory",
+									"value": "68b1b3496c77ba0a64e958aa"
+								},
+								{
+									"key": "lang",
+									"value": "en"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single-product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{url}}/products/68b1b49e6c77ba0a64e958b2"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cart",
+			"item": [
+				{
+					"name": "add-cart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"productId\" : \"68b1b49e6c77ba0a64e958b2\",\r\n    \"quantity\" : 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{URI}}/cart"
+					},
+					"response": []
+				},
+				{
+					"name": "get-cart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{URI}}/cart"
+					},
+					"response": []
+				},
+				{
+					"name": "update-quantity",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\" : 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{URI}}/cart/68b4a6863a93026bb24c476b"
+					},
+					"response": []
+				},
+				{
+					"name": "delete-cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{URI}}/cart/68b4a6863a93026bb24c476b"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user-fav",
+			"item": [
+				{
+					"name": "add-fav",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"productId\" : \"68b1b49e6c77ba0a64e958b2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{URI}}/favorites"
+					},
+					"response": []
+				},
+				{
+					"name": "ger-fav",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URI}}/favorites?page=1&limit=10",
+							"host": [
+								"{{URI}}"
+							],
+							"path": [
+								"favorites"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-fav",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{URI}}/favorites/68b1b49e6c77ba0a64e958b2"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGIzOTNkNDY4NjkxYWNlM2EwZmEzNzkiLCJpYXQiOjE3NTY2NjY2MjksImV4cCI6MTc1NjY3MzgyOX0.9K1jmrvCjSgpC1-_0IXIOYgBwGa_7Rb7Wd6FR4w9AII"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"pm.request.headers.add({\r",
+					"    key: \"x-api-key\",\r",
+					"    value: pm.collectionVariables.get(\"apiKey\")\r",
+					"});\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apiKey",
+			"value": "96393a7999607e16b5364cc0302f3a9ca3d4c751688b48221646264f188750ee3e93077990a1526ceced9a58b26ebfaf6fa0f725939b819ab9b27b207d7440de"
+		}
+	]
+}
