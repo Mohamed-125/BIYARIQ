@@ -13,6 +13,7 @@ import {
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { FiMail, FiPhone, FiLock, FiArrowLeft } from "react-icons/fi";
+import Input from "@/components/ui/Input";
 
 interface LoginForm {
   email: string;
@@ -23,10 +24,10 @@ interface LoginForm {
 
 interface LoginModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
 }
 
-export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
+export default function LoginModal({ open, setOpen }: LoginModalProps) {
   const [loginMethod, setLoginMethod] = useState<"select" | "email" | "phone">(
     "select"
   );
@@ -53,7 +54,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
     try {
       if (loginMethod === "email") {
         await login(data.email, data.password);
-        onOpenChange(false);
+        setOpen(false);
       } else if (loginMethod === "phone") {
         if (phoneStep === "phone") {
           // Here you would typically make an API call to send verification code
@@ -62,7 +63,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
         } else {
           // Here you would typically verify the code and log the user in
           console.log("Verifying code:", data.verificationCode);
-          onOpenChange(false);
+          setOpen(false);
         }
       }
     } catch (error) {
@@ -71,7 +72,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} setOpen={setOpen}>
       <DialogContent className="sm:max-w-md relative">
         <DialogHeader>
           <DialogTitle className="text-center text-xl flex items-center justify-center gap-2">
@@ -127,7 +128,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   </label>
                   <div className="relative">
                     <FiMail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
+                    <Input
                       id="email"
                       type="email"
                       dir="ltr"
@@ -161,7 +162,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   </label>
                   <div className="relative">
                     <FiLock className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
+                    <Input
                       id="password"
                       type="password"
                       className="appearance-none block w-full pr-10 py-2 px-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
@@ -197,7 +198,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 </label>
                 <div className="relative">
                   <FiPhone className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
+                  <Input
                     id="phoneNumber"
                     type="tel"
                     dir="ltr"
@@ -231,7 +232,7 @@ export default function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   رمز التحقق
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     id="verificationCode"
                     type="text"
                     dir="ltr"

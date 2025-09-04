@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Upload, X, Plus, FileText, Video } from "lucide-react";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
+import Input from "@/components/ui/Input";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -146,7 +147,7 @@ export default function AddCourseComponent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               عنوان الدورة *
             </label>
-            <input
+            <Input
               type="text"
               {...register("title", { required: "عنوان الدورة مطلوب" })}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -162,7 +163,7 @@ export default function AddCourseComponent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               المدرب
             </label>
-            <input
+            <Input
               type="text"
               {...register("instructor")}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -228,7 +229,7 @@ export default function AddCourseComponent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               الكلمات المفتاحية
             </label>
-            <input
+            <Input
               type="text"
               {...register("tags")}
               placeholder="افصل بين الكلمات بفواصل"
@@ -255,7 +256,7 @@ export default function AddCourseComponent() {
                 <div className="flex text-sm text-gray-600">
                   <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                     <span>رفع صورة</span>
-                    <input
+                    <Input
                       type="file"
                       {...register("coverImage", {
                         required: "صورة الغلاف مطلوبة",
@@ -286,7 +287,7 @@ export default function AddCourseComponent() {
                 <div className="flex text-sm text-gray-600">
                   <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                     <span>رفع صور</span>
-                    <input
+                    <Input
                       type="file"
                       {...register("galleryImages")}
                       className="sr-only"
@@ -305,7 +306,7 @@ export default function AddCourseComponent() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               فيديو ترويجي
             </label>
-            <input
+            <Input
               type="url"
               {...register("promoVideo")}
               placeholder="رابط يوتيوب أو فيميو"
@@ -347,7 +348,7 @@ export default function AddCourseComponent() {
             <div className="space-y-4">
               {objectives.map((_, index) => (
                 <div key={index} className="flex gap-4 items-start">
-                  <input
+                  <Input
                     type="text"
                     placeholder="أدخل هدف التعلم"
                     value={objectives[index]}
@@ -423,7 +424,7 @@ export default function AddCourseComponent() {
                   <div className="text-sm text-gray-500 mb-1">
                     الوحدة {moduleIndex + 1}
                   </div>
-                  <input
+                  <Input
                     type="text"
                     placeholder="عنوان الوحدة"
                     value={module.title}
@@ -460,7 +461,7 @@ export default function AddCourseComponent() {
                             <div className="text-sm text-gray-500 mb-1">
                               الدرس {lessonIndex + 1}
                             </div>
-                            <input
+                            <Input
                               type="text"
                               placeholder="عنوان الدرس"
                               value={lesson.title}
@@ -498,11 +499,11 @@ export default function AddCourseComponent() {
                           </div>
                         </div>
 
-                        {/* Video input */}
+                        {/* Video Input */}
                         {lesson.type === "video" && (
                           <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
                             <Video className="w-5 h-5 text-gray-400" />
-                            <input
+                            <Input
                               type="url"
                               placeholder="رابط الفيديو"
                               value={lesson.content}
@@ -522,7 +523,7 @@ export default function AddCourseComponent() {
                         {lesson.type === "pdf" && (
                           <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
                             <FileText className="w-5 h-5 text-gray-400" />
-                            <input
+                            <Input
                               type="file"
                               accept=".pdf"
                               onChange={(e) => {
@@ -581,7 +582,7 @@ export default function AddCourseComponent() {
                                     <div className="text-sm text-gray-500 mb-2">
                                       السؤال {qIndex + 1}
                                     </div>
-                                    <input
+                                    <Input
                                       type="text"
                                       placeholder="اكتب السؤال هنا"
                                       value={q.question}
@@ -617,7 +618,7 @@ export default function AddCourseComponent() {
                                       key={optIndex}
                                       className="flex items-center gap-3"
                                     >
-                                      <input
+                                      <Input
                                         type="radio"
                                         name={`correct-${moduleIndex}-${lessonIndex}-${qIndex}`}
                                         checked={q.correctOption === optIndex}
@@ -631,7 +632,7 @@ export default function AddCourseComponent() {
                                         }}
                                         className="text-purple-600 focus:ring-purple-500"
                                       />
-                                      <input
+                                      <Input
                                         type="text"
                                         placeholder={`الخيار ${optIndex + 1}`}
                                         value={option}
@@ -670,7 +671,7 @@ export default function AddCourseComponent() {
                               rows={4}
                               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
-                            <input
+                            <Input
                               type="datetime-local"
                               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
@@ -680,11 +681,11 @@ export default function AddCourseComponent() {
                         {/* Live session */}
                         {lesson.type === "live" && (
                           <div className="space-y-4">
-                            <input
+                            <Input
                               type="datetime-local"
                               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
-                            <input
+                            <Input
                               type="url"
                               placeholder="رابط الجلسة المباشرة"
                               value={lesson.content}
@@ -703,7 +704,7 @@ export default function AddCourseComponent() {
                         {/* Preview checkbox */}
                         <div className="flex items-center gap-4">
                           <label className="flex items-center gap-2">
-                            <input
+                            <Input
                               type="checkbox"
                               checked={lesson.isPreview}
                               onChange={(e) => {
@@ -788,7 +789,7 @@ export default function AddCourseComponent() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 كلمة المرور
               </label>
-              <input
+              <Input
                 type="password"
                 {...register("accessPassword")}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"

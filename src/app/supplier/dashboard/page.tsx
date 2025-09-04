@@ -2,7 +2,7 @@
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
-import Label from "@/components/ui/label";
+import Label from "@/components/ui/Label";
 
 export default function SupplierProfile() {
   return (

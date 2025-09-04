@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Upload, Plus, X, Percent } from "lucide-react";
 import CreatableSelect from "react-select/creatable";
 import TipTapEditor from "@/components/TipTapEditor";
-
+import Input from "@/components/ui/Input";
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -257,7 +257,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 عنوان الدورة *
               </label>
-              <input
+              <Input
                 type="text"
                 {...register("title", { required: "عنوان الدورة مطلوب" })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -313,7 +313,7 @@ export default function AddCoursePage() {
                   <div className="flex text-sm text-gray-600">
                     <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                       <span>رفع صورة</span>
-                      <input
+                      <Input
                         type="file"
                         {...register("thumbnail", {
                           required: "صورة الدورة مطلوبة",
@@ -346,7 +346,7 @@ export default function AddCoursePage() {
                   <div className="flex text-sm text-gray-600">
                     <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                       <span>رفع فيديو</span>
-                      <input
+                      <Input
                         type="file"
                         {...register("previewVideo")}
                         className="sr-only"
@@ -373,7 +373,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 السعر *
               </label>
-              <input
+              <Input
                 type="number"
                 {...register("price", {
                   required: "السعر مطلوب",
@@ -392,7 +392,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 سعر الخصم
               </label>
-              <input
+              <Input
                 type="number"
                 {...register("discountPrice", {
                   min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
@@ -410,7 +410,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 الحد الأقصى للمشتركين
               </label>
-              <input
+              <Input
                 type="number"
                 {...register("enrollmentLimit", {
                   min: { value: 1, message: "يجب أن يكون العدد أكبر من 0" },
@@ -451,7 +451,7 @@ export default function AddCoursePage() {
               >
                 <div className="bg-gray-50 p-4 flex items-center justify-between">
                   <div className="flex-1">
-                    <input
+                    <Input
                       type="text"
                       placeholder="عنوان الوحدة"
                       value={unit.title}
@@ -535,7 +535,7 @@ export default function AddCoursePage() {
                           onDrop={(e) => handleDrop(e, unit.id, lesson.id)}
                         >
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input
+                            <Input
                               type="text"
                               placeholder="عنوان الدرس"
                               value={lesson.title}
@@ -547,7 +547,7 @@ export default function AddCoursePage() {
                               }}
                               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
-                            <input
+                            <Input
                               type="text"
                               placeholder="مدة الدرس (مثال: 30:00)"
                               value={lesson.duration}
@@ -597,7 +597,7 @@ export default function AddCoursePage() {
                               <option value="اختبار">اختبار</option>
                             </select>
 
-                            <input
+                            <Input
                               type="text"
                               placeholder="رابط المحتوى"
                               value={lesson.content}
@@ -614,7 +614,7 @@ export default function AddCoursePage() {
 
                           <div className="mt-4 flex items-center justify-between">
                             <label className="flex items-center gap-2">
-                              <input
+                              <Input
                                 type="checkbox"
                                 checked={lesson.isPreview}
                                 onChange={(e) => {
@@ -758,7 +758,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 تاريخ البداية
               </label>
-              <input
+              <Input
                 type="date"
                 {...register("startDate")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -769,7 +769,7 @@ export default function AddCoursePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 تاريخ النهاية
               </label>
-              <input
+              <Input
                 type="date"
                 {...register("endDate")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -791,7 +791,7 @@ export default function AddCoursePage() {
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
+              <Input
                 type="checkbox"
                 {...register("isPublished")}
                 className="sr-only peer"
@@ -820,7 +820,7 @@ export default function AddCoursePage() {
                 <div className="bg-gray-50 p-4">
                   <div className="flex items-start gap-4">
                     <div className="flex-grow">
-                      <input
+                      <Input
                         type="text"
                         value={unit.title}
                         onChange={(e) => {
@@ -900,7 +900,7 @@ export default function AddCoursePage() {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <input
+                            <Input
                               type="text"
                               value={lesson.title}
                               onChange={(e) => {
@@ -948,7 +948,7 @@ export default function AddCoursePage() {
                             />
                           </div>
                           <div>
-                            <input
+                            <Input
                               type="text"
                               value={lesson.duration}
                               onChange={(e) => {
@@ -963,7 +963,7 @@ export default function AddCoursePage() {
                             />
                           </div>
                           <div>
-                            <input
+                            <Input
                               type="text"
                               value={lesson.content}
                               onChange={(e) => {
@@ -985,7 +985,7 @@ export default function AddCoursePage() {
                           </div>
                           <div className="md:col-span-2 flex items-center justify-between">
                             <label className="flex items-center gap-2">
-                              <input
+                              <Input
                                 type="checkbox"
                                 checked={lesson.isPreview}
                                 onChange={(e) => {
@@ -1031,134 +1031,6 @@ export default function AddCoursePage() {
             >
               <Plus className="w-6 h-6" />
               <span>إضافة وحدة جديدة</span>
-            </button>
-          </div>
-        </motion.section>
-
-        {/* Coupons */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <h2 className="text-xl font-semibold mb-6">كوبونات الخصم</h2>
-          <div className="space-y-4">
-            {coupons.map((coupon, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 p-4 rounded-lg space-y-4 relative"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCoupons(coupons.filter((_, i) => i !== index))
-                  }
-                  className="absolute top-2 right-2 text-red-500 hover:bg-red-50 p-1 rounded-full"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      كود الخصم
-                    </label>
-                    <input
-                      type="text"
-                      value={coupon.code}
-                      onChange={(e) => {
-                        const newCoupons = [...coupons];
-                        newCoupons[index].code = e.target.value;
-                        setCoupons(newCoupons);
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      نوع الخصم
-                    </label>
-                    <select
-                      value={coupon.discountType}
-                      onChange={(e) => {
-                        const newCoupons = [...coupons];
-                        newCoupons[index].discountType = e.target.value as
-                          | "percentage"
-                          | "fixed";
-                        setCoupons(newCoupons);
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      <option value="percentage">نسبة مئوية</option>
-                      <option value="fixed">قيمة ثابتة</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      قيمة الخصم
-                    </label>
-                    <input
-                      type="number"
-                      value={coupon.discountValue}
-                      onChange={(e) => {
-                        const newCoupons = [...coupons];
-                        newCoupons[index].discountValue = Number(
-                          e.target.value
-                        );
-                        setCoupons(newCoupons);
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      تاريخ الانتهاء
-                    </label>
-                    <input
-                      type="date"
-                      value={coupon.expiryDate}
-                      onChange={(e) => {
-                        const newCoupons = [...coupons];
-                        newCoupons[index].expiryDate = e.target.value;
-                        setCoupons(newCoupons);
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      الحد الأقصى للاستخدام
-                    </label>
-                    <input
-                      type="number"
-                      value={coupon.maxUses}
-                      onChange={(e) => {
-                        const newCoupons = [...coupons];
-                        newCoupons[index].maxUses = Number(e.target.value);
-                        setCoupons(newCoupons);
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                setCoupons([
-                  ...coupons,
-                  {
-                    code: "",
-                    discountType: "percentage",
-                    discountValue: 0,
-                    expiryDate: "",
-                    maxUses: 0,
-                  },
-                ])
-              }
-              className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>إضافة كوبون</span>
             </button>
           </div>
         </motion.section>

@@ -123,7 +123,7 @@ const Footer = () => {
           {/* Payment Methods */}
           <div className="space-y-4 text-right">
             <h3 className="text-xl font-semibold">وسائل الدفع</h3>
-            <div class="flex flex-wrap gap-2  justify-start   sm:mx-0">
+            <div className="flex flex-wrap gap-2  justify-start   sm:mx-0">
               <Image
                 src="/payment/mada.webp"
                 alt="Mada"

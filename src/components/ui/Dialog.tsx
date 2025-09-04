@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface DialogProps {
   children: React.ReactNode;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
 }
 
 const overlayVariants = {
@@ -40,19 +40,19 @@ const contentVariants = {
   },
 };
 
-export function Dialog({ children, open, onOpenChange }: DialogProps) {
+export function Dialog({ children, open, setOpen }: DialogProps) {
   // test commit
   return (
     <AnimatePresence>
       {open && (
         <>
           <motion.div
-            className="fixed  inset-0 bg-black/30 backdrop-blur-sm z-50 !ml-0"
+            className="fixed  inset-0 bg-black/30 backdrop-blur-sm z-50 mb-0 !ml-0"
             initial="hidden"
             animate="visible"
             exit="hidden"
             variants={overlayVariants}
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpen(false)}
           />
           <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
             <motion.div

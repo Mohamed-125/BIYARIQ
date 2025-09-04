@@ -82,7 +82,10 @@ export default function DownloadsPage() {
         <h1 className="text-2xl font-bold">تنزيلاتي</h1>
         <div className="flex items-center gap-2 text-gray-600">
           <FiDownload className="w-5 h-5" />
-          <span>إجمالي التنزيلات: {mockDownloads.reduce((acc, curr) => acc + curr.downloadCount, 0)}</span>
+          <span>
+            إجمالي التنزيلات:{" "}
+            {mockDownloads.reduce((acc, curr) => acc + curr.downloadCount, 0)}
+          </span>
         </div>
       </div>
 
@@ -104,12 +107,16 @@ export default function DownloadsPage() {
                   <div className="flex items-center gap-1">
                     <FiDownload className="w-4 h-4" />
                     <span>
-                      {download.downloadCount} من {download.maxDownloads} تنزيلات
+                      {download.downloadCount} من {download.maxDownloads}{" "}
+                      تنزيلات
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <FiCalendar className="w-4 h-4" />
-                    <span>تاريخ الانتهاء: {new Date(download.expiryDate).toLocaleDateString("ar-SA")}</span>
+                    <span>
+                      تاريخ الانتهاء:{" "}
+                      {new Date(download.expiryDate).toLocaleDateString("ar")}
+                    </span>
                   </div>
                 </div>
 
@@ -121,7 +128,9 @@ export default function DownloadsPage() {
                       className="flex items-center gap-2 text-sm text-gray-600"
                     >
                       <FiClock className="w-4 h-4" />
-                      <span>{new Date(history.date).toLocaleDateString("ar-SA")}</span>
+                      <span>
+                        {new Date(history.date).toLocaleDateString("ar")}
+                      </span>
                       <span className="text-gray-400">|</span>
                       <span dir="ltr">{history.ip}</span>
                     </div>
@@ -143,7 +152,9 @@ export default function DownloadsPage() {
                 <div
                   className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                   style={{
-                    width: `${(download.downloadCount / download.maxDownloads) * 100}%`,
+                    width: `${
+                      (download.downloadCount / download.maxDownloads) * 100
+                    }%`,
                   }}
                 />
               </div>

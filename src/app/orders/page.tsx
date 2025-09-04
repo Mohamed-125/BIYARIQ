@@ -164,6 +164,43 @@ const OrdersPage = () => {
                           رقم الطلب: #{product.id}
                         </span>
                       </div>
+
+                      {/* Display variants, color, and size */}
+                      <div className="mt-2 flex flex-wrap gap-1.5 text-sm text-gray-600">
+                        {product.variants && product.variants.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-1">
+                            {product.variants.map((variant, idx) => (
+                              <span
+                                key={idx}
+                                className="bg-gray-100 px-2 py-1 rounded-md"
+                              >
+                                {variant.name}: {variant.value}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {product.color && (
+                          <span className="inline-flex items-center gap-1 mr-2">
+                            <span className="font-medium">اللون:</span>
+                            <span className="flex items-center gap-1">
+                              <span
+                                className="inline-block w-3 h-3 rounded-full border border-gray-300"
+                                style={{
+                                  backgroundColor:
+                                    product.colorCode || product.color,
+                                }}
+                              ></span>
+                              {product.color}
+                            </span>
+                          </span>
+                        )}
+                        {product.size && (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="font-medium">المقاس:</span>
+                            <span>{product.size}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-xl font-bold text-purple-800">
                       {formatPrice(product.price)}

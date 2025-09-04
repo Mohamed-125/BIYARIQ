@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Search, Package, XCircle, CheckCircle } from "lucide-react";
+import Input from "../../../components/ui/Input";
 
 type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "cancelled";
 
@@ -114,8 +115,11 @@ export default function AffiliateOrders() {
       <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
-            <Search className="absolute right-3 top-3 text-gray-400" size={20} />
-            <input
+            <Search
+              className="absolute right-3 top-3 text-gray-400"
+              size={20}
+            />
+            <Input
               type="text"
               placeholder="ابحث عن المنتجات..."
               className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -128,7 +132,9 @@ export default function AffiliateOrders() {
             <select
               className="w-full p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as OrderStatus | "all")}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as OrderStatus | "all")
+              }
             >
               <option value="all">جميع الحالات</option>
               {Object.entries(statusLabels).map(([key, label]) => (
@@ -140,7 +146,7 @@ export default function AffiliateOrders() {
           </div>
 
           <div>
-            <input
+            <Input
               type="date"
               className="w-full p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={startDate}
@@ -149,7 +155,7 @@ export default function AffiliateOrders() {
           </div>
 
           <div>
-            <input
+            <Input
               type="date"
               className="w-full p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={endDate}
@@ -169,12 +175,24 @@ export default function AffiliateOrders() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">رقم الطلب</th>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">المنتج</th>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">المشتري</th>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">الحالة</th>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">التاريخ</th>
-                <th className="text-right py-4 px-6 font-medium text-gray-600">العمولة</th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  رقم الطلب
+                </th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  المنتج
+                </th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  المشتري
+                </th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  الحالة
+                </th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  التاريخ
+                </th>
+                <th className="text-right py-4 px-6 font-medium text-gray-600">
+                  العمولة
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -185,7 +203,9 @@ export default function AffiliateOrders() {
                   <td className="py-4 px-6">{order.buyer}</td>
                   <td className="py-4 px-6">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${statusColors[order.status].bg} ${statusColors[order.status].text}`}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                        statusColors[order.status].bg
+                      } ${statusColors[order.status].text}`}
                     >
                       {statusLabels[order.status]}
                     </span>

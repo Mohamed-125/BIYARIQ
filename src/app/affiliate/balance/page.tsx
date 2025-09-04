@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
+import Input from "../../../components/ui/Input";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -251,7 +252,7 @@ export default function BalancePage() {
             <div className="flex gap-4 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
+                <Input
                   type="text"
                   placeholder="البحث في المعاملات..."
                   value={searchTerm}
@@ -261,7 +262,7 @@ export default function BalancePage() {
               </div>
               <div className="relative">
                 <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
+                <Input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
@@ -344,7 +345,7 @@ export default function BalancePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   البريد الإلكتروني لـ PayPal
                 </label>
-                <input
+                <Input
                   type="email"
                   value={paypalEmail}
                   onChange={(e) => setPaypalEmail(e.target.value)}
@@ -356,7 +357,7 @@ export default function BalancePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   المبلغ (ريال سعودي)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={withdrawalAmount}
                   onChange={(e) => setWithdrawalAmount(e.target.value)}

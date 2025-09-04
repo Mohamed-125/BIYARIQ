@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
 import Link from "next/link";
-
+import Input from "@/components/ui/Input";
 interface SearchResult {
   id: string;
   name: string;
@@ -17,7 +22,7 @@ interface SearchResult {
 
 interface SearchModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
 }
 
 const mockResults: SearchResult[] = [
@@ -47,7 +52,7 @@ const mockResults: SearchResult[] = [
   },
 ];
 
-const SearchModal: React.FC<SearchModalProps> = ({ open, onOpenChange }) => {
+const SearchModal: React.FC<SearchModalProps> = ({ open, setOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +84,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ open, onOpenChange }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} setOpen={setOpen}>
       <DialogContent className="max-w-2xl w-full p-0 overflow-hidden">
         <DialogHeader className="p-4 border-b">
           <DialogTitle className="text-center">البحث في المتجر</DialogTitle>
@@ -89,7 +94,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ open, onOpenChange }) => {
           <form onSubmit={handleSearch} className="relative">
             <div className="relative flex items-center">
               <Search className="absolute right-3 text-gray-400" size={20} />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,7 +125,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ open, onOpenChange }) => {
                   <Link
                     href={result.url}
                     key={result.id}
-                    onClick={() => onOpenChange(false)}
+                    onClick={() => setOpen(false)}
                   >
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}

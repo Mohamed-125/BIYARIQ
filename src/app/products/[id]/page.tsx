@@ -95,6 +95,10 @@ const dummyProduct: Product = {
   format: "ISO",
   downloadLink: "#",
   licenseKey: "XXXXX-XXXXX-XXXXX-XXXXX",
+  variants: [
+    { name: "الإصدار", options: ["Home", "Pro", "Enterprise"] },
+    { name: "نوع الترخيص", options: ["شخصي", "تجاري", "تعليمي"] },
+  ],
   details: `
     <div class="space-y-6">
       <h3 class="text-xl font-bold">المواصفات</h3>
@@ -163,6 +167,10 @@ export default function ProductDetails() {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
   const [showSharePopup, setShowSharePopup] = useState(false);
+  const [selectedVariants, setSelectedVariants] = useState<
+    Record<string, string>
+  >({});
+  const [hasUserPurchased, setHasUserPurchased] = useState(false);
 
   const shareUrl = "";
 
@@ -287,6 +295,40 @@ export default function ProductDetails() {
               <span className="font-medium">الصيغة:</span>
               <span>{(dummyProduct as any).format}</span>
             </div>
+
+            {/* Variants */}
+            {(dummyProduct as any).variants &&
+              (dummyProduct as any).variants.map(
+                (variant: any, index: number) => (
+                  <div key={index} className="mt-4">
+                    <span className="font-medium text-gray-600">
+                      {variant.name}:
+                    </span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {variant.options.map(
+                        (option: string, optionIndex: number) => (
+                          <button
+                            key={optionIndex}
+                            onClick={() =>
+                              setSelectedVariants((prev) => ({
+                                ...prev,
+                                [variant.name]: option,
+                              }))
+                            }
+                            className={`px-4 py-2 rounded-lg border ${
+                              selectedVariants[variant.name] === option
+                                ? "border-[#7b2cbf] bg-purple-50 text-[#7b2cbf]"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
           </div>
 
           <button className="w-full py-4 px-6 bg-[#7b2cbf] text-white rounded-lg font-medium hover:bg-[#6a24a6] transition-colors">
@@ -356,7 +398,7 @@ export default function ProductDetails() {
       </motion.div>
 
       {/* Share Popup */}
-      <SharePopup open={showSharePopup} onOpenChange={setShowSharePopup} />
+      <SharePopup open={showSharePopup} setOpen={setShowSharePopup} />
 
       {/* Reviews Section */}
       <motion.div
@@ -368,6 +410,50 @@ export default function ProductDetails() {
         <h2 className="text-2xl font-bold text-gray-900 mb-8">
           تقييمات المنتج
         </h2>
+
+        {/* Add Review Section */}
+        <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
+          {hasUserPurchased ? (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">أضف تقييمك</h3>
+              <div className="flex items-center gap-2">
+                <span>التقييم:</span>
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`text-2xl ${
+                        star <= 5 ? "text-yellow-400" : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block mb-2">التعليق:</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#7b2cbf]"
+                  rows={4}
+                  placeholder="اكتب تعليقك هنا..."
+                />
+              </div>
+              <button className="px-6 py-2 bg-[#7b2cbf] text-white rounded-lg hover:bg-[#6a24a6] transition-colors">
+                إرسال التقييم
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-600">
+                يجب عليك شراء المنتج أولاً لتتمكن من إضافة تقييم
+              </p>
+              <button className="mt-4 px-6 py-2 bg-[#7b2cbf] text-white rounded-lg hover:bg-[#6a24a6] transition-colors">
+                اشتري الآن للتقييم
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-8">
           {dummyReviews.map((review) => (

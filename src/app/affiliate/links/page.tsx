@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Copy, Share2, QrCode, Search } from "lucide-react";
+import Input from "../../../components/ui/Input";
 
 const links = [
   {
@@ -54,14 +55,16 @@ export default function AffiliateLinks() {
         className="mb-8"
       >
         <h1 className="text-3xl font-bold mb-4">روابط التسويق بالعمولة</h1>
-        <p className="text-gray-600">قم بإدارة روابط التسويق الخاصة بك وتتبع أدائها</p>
+        <p className="text-gray-600">
+          قم بإدارة روابط التسويق الخاصة بك وتتبع أدائها
+        </p>
       </motion.div>
 
       {/* Search Bar */}
       <div className="bg-white rounded-xl p-4 mb-8 shadow-sm">
         <div className="relative">
           <Search className="absolute right-3 top-3 text-gray-400" size={20} />
-          <input
+          <Input
             type="text"
             placeholder="ابحث عن المنتجات..."
             className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -91,13 +94,16 @@ export default function AffiliateLinks() {
               </div>
 
               <div className="flex-grow">
-                <h3 className="text-xl font-semibold mb-2">{link.productName}</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  {link.productName}
+                </h3>
                 <div className="flex flex-wrap gap-4 text-gray-600 mb-4">
                   <div>
                     <span className="font-medium">المبيعات:</span> {link.sales}
                   </div>
                   <div>
-                    <span className="font-medium">العمولة:</span> {link.commission}
+                    <span className="font-medium">العمولة:</span>{" "}
+                    {link.commission}
                   </div>
                 </div>
 

@@ -6,6 +6,9 @@ import { Search, Calendar, Package, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import Input from "@/components/ui/Input";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -212,6 +215,7 @@ export default function OrdersPage() {
       toast.error("حدث خطأ أثناء تحديث حالة الطلب");
     }
   };
+  const pathname = usePathname();
 
   return (
     <motion.div
@@ -225,7 +229,7 @@ export default function OrdersPage() {
         <div className="flex gap-4">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
+            <Input
               type="text"
               placeholder="البحث برقم الطلب أو اسم العميل..."
               value={searchTerm}
@@ -235,7 +239,7 @@ export default function OrdersPage() {
           </div>
           <div className="relative">
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
+            <Input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -263,7 +267,10 @@ export default function OrdersPage() {
                   variants={itemVariants}
                   className="bg-white rounded-xl p-6 shadow-sm"
                 >
-                  <div className="flex justify-between items-start mb-4">
+                  <Link
+                    href={pathname + `/${order.id}`}
+                    className="flex justify-between items-start mb-4"
+                  >
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">#{order.id}</h3>
@@ -288,7 +295,8 @@ export default function OrdersPage() {
                     <p className="text-lg font-semibold">
                       {formatPrice(order.total)}
                     </p>
-                  </div>
+                  </Link>
+
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium mb-2">المنتجات:</h4>
                     <ul className="space-y-2">
@@ -308,25 +316,16 @@ export default function OrdersPage() {
                       ))}
                     </ul>
                   </div>
-                  {statusFlow[order.status].length > 0 && (
                     <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
-                      {statusFlow[order.status].map((nextStatus) => (
                         <Button
-                          key={nextStatus}
-                          variant={
-                            nextStatus === "cancelled"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                          onClick={() =>
-                            handleStatusUpdate(order.id, nextStatus)
-                          }
+                          variant={"destructive"}
+                          onClick={() => {
+                            // cancel order
+                          }}
                         >
-                          {statusColors[nextStatus].label}
+                          إلغاء
                         </Button>
-                      ))}
                     </div>
-                  )}
                 </motion.div>
               ))}
             </div>

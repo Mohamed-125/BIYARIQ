@@ -12,6 +12,7 @@ import StarterKit from "@tiptap/starter-kit";
 import CreatableSelect from "react-select/creatable";
 import { data } from "framer-motion/client";
 import TipTapEditor from "@/components/TipTapEditor";
+import Input from "@/components/ui/Input";
 
 const categoryOptions = [
   { value: "electronics", label: "إلكترونيات" },
@@ -139,44 +140,6 @@ export default function AddProductPage() {
 
   const productType = watch("productType");
 
-  const validateCoupons = () => {
-    for (const coupon of coupons) {
-      if (!coupon.code) {
-        setShowAlert({ message: "يجب إدخال كود الكوبون", type: "error" });
-        return false;
-      }
-      if (coupon.value <= 0) {
-        setShowAlert({
-          message: "يجب أن تكون قيمة الخصم أكبر من 0",
-          type: "error",
-        });
-        return false;
-      }
-      if (coupon.type === "percentage" && coupon.value > 100) {
-        setShowAlert({
-          message: "يجب أن تكون نسبة الخصم أقل من أو تساوي 100%",
-          type: "error",
-        });
-        return false;
-      }
-      if (!coupon.startDate || !coupon.endDate) {
-        setShowAlert({
-          message: "يجب تحديد تاريخ البدء والانتهاء",
-          type: "error",
-        });
-        return false;
-      }
-      if (new Date(coupon.startDate) > new Date(coupon.endDate)) {
-        setShowAlert({
-          message: "تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء",
-          type: "error",
-        });
-        return false;
-      }
-    }
-    return true;
-  };
-
   const onSubmit = (data: ProductFormData) => {
     if (coupons.length > 0 && !validateCoupons()) {
       return;
@@ -295,7 +258,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 اسم المنتج *
               </label>
-              <input
+              <Input
                 type="text"
                 {...register("name", { required: "اسم المنتج مطلوب" })}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -311,7 +274,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 رمز المنتج (SKU)
               </label>
-              <input
+              <Input
                 type="text"
                 {...register("sku")}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -415,7 +378,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 الكلمات المفتاحية
               </label>
-              <input
+              <Input
                 type="text"
                 {...register("tags")}
                 placeholder="افصل بين الكلمات بفواصل"
@@ -436,7 +399,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 السعر الأساسي *
               </label>
-              <input
+              <Input
                 type="number"
                 step="0.01"
                 {...register("basePrice", {
@@ -456,7 +419,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 سعر الخصم
               </label>
-              <input
+              <Input
                 type="number"
                 step="0.01"
                 {...register("discountPrice", {
@@ -476,7 +439,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الكمية المتوفرة
                 </label>
-                <input
+                <Input
                   type="number"
                   {...register("stockQuantity", {
                     min: { value: 0, message: "الكمية يجب أن تكون أكبر من 0" },
@@ -493,7 +456,7 @@ export default function AddProductPage() {
 
             <div>
               <label className="flex items-center gap-2">
-                <input
+                <Input
                   type="checkbox"
                   {...register("allowBackorders")}
                   className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
@@ -524,7 +487,7 @@ export default function AddProductPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         رقم بوليصة الشحن (AWB)
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={label.awbNumber}
                         onChange={(e) => {
@@ -542,7 +505,7 @@ export default function AddProductPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         شركة الشحن
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={label.carrier}
                         onChange={(e) => {
@@ -584,7 +547,7 @@ export default function AddProductPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         رابط التتبع
                       </label>
-                      <input
+                      <Input
                         type="url"
                         value={label.trackingUrl}
                         onChange={(e) => {
@@ -602,7 +565,7 @@ export default function AddProductPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         تاريخ الشحن
                       </label>
-                      <input
+                      <Input
                         type="date"
                         value={label.shippingDate}
                         onChange={(e) => {
@@ -620,7 +583,7 @@ export default function AddProductPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         تاريخ التوصيل المتوقع
                       </label>
-                      <input
+                      <Input
                         type="date"
                         value={label.estimatedDelivery}
                         onChange={(e) => {
@@ -690,7 +653,7 @@ export default function AddProductPage() {
                   <div className="flex text-sm text-gray-600">
                     <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                       <span>رفع صورة</span>
-                      <input
+                      <Input
                         type="file"
                         {...register("mainImage", {
                           required: "الصورة الرئيسية مطلوبة",
@@ -723,7 +686,7 @@ export default function AddProductPage() {
                   <div className="flex text-sm text-gray-600">
                     <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                       <span>رفع صور</span>
-                      <input
+                      <Input
                         type="file"
                         {...register("additionalImages")}
                         className="sr-only"
@@ -744,7 +707,7 @@ export default function AddProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 رابط الفيديو
               </label>
-              <input
+              <Input
                 type="url"
                 {...register("videoLink")}
                 placeholder="رابط يوتيوب أو فيميو"
@@ -812,7 +775,7 @@ export default function AddProductPage() {
                     <div className="flex text-sm text-gray-600">
                       <label className="relative cursor-pointer rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
                         <span>رفع ملف</span>
-                        <input
+                        <Input
                           type="file"
                           {...register("digitalFile", {
                             required: "الملف الرقمي مطلوب",
@@ -839,7 +802,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الكمية المتوفرة
                 </label>
-                <input
+                <Input
                   type="number"
                   {...register("stockQuantity", {
                     min: { value: 0, message: "الكمية يجب أن تكون أكبر من 0" },
@@ -857,7 +820,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   رابط التحميل
                 </label>
-                <input
+                <Input
                   type="url"
                   {...register("downloadUrl")}
                   placeholder="رابط مباشر للتحميل"
@@ -881,7 +844,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   كلمة مرور الوصول
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("accessPassword")}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -892,7 +855,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   عدد مرات التحميل المسموح بها
                 </label>
-                <input
+                <Input
                   type="number"
                   {...register("allowedDownloads")}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -903,7 +866,7 @@ export default function AddProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   تاريخ انتهاء الصلاحية
                 </label>
-                <input
+                <Input
                   type="date"
                   {...register("expirationDate")}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -912,185 +875,6 @@ export default function AddProductPage() {
             </div>
           </motion.section>
         )}
-
-        {/* Coupons Section */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">كوبونات الخصم</h2>
-            <button
-              type="button"
-              onClick={addCoupon}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              إضافة كوبون
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            {coupons.map((coupon, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="border border-gray-200 rounded-lg p-4 space-y-4"
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        كود الكوبون
-                      </label>
-                      <input
-                        type="text"
-                        value={coupon.code}
-                        onChange={(e) =>
-                          updateCoupon(index, "code", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="مثال: SALE50"
-                      />
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          نوع الخصم
-                        </label>
-                        <select
-                          value={coupon.type}
-                          onChange={(e) =>
-                            updateCoupon(
-                              index,
-                              "type",
-                              e.target.value as "percentage" | "fixed"
-                            )
-                          }
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        >
-                          <option value="percentage">نسبة مئوية</option>
-                          <option value="fixed">مبلغ ثابت</option>
-                        </select>
-                      </div>
-
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          قيمة الخصم
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={coupon.value}
-                            onChange={(e) =>
-                              updateCoupon(
-                                index,
-                                "value",
-                                parseFloat(e.target.value)
-                              )
-                            }
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            min="0"
-                            step={coupon.type === "percentage" ? "1" : "0.01"}
-                          />
-                          <span className="absolute left-3 top-2 text-gray-500">
-                            {coupon.type === "percentage" ? "%" : "$"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => removeCoupon(index)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      تاريخ البدء
-                    </label>
-                    <input
-                      type="date"
-                      value={coupon.startDate}
-                      onChange={(e) =>
-                        updateCoupon(index, "startDate", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      تاريخ الانتهاء
-                    </label>
-                    <input
-                      type="date"
-                      value={coupon.endDate}
-                      onChange={(e) =>
-                        updateCoupon(index, "endDate", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      عدد مرات الاستخدام
-                    </label>
-                    <input
-                      type="number"
-                      value={coupon.usageLimit}
-                      onChange={(e) =>
-                        updateCoupon(
-                          index,
-                          "usageLimit",
-                          parseInt(e.target.value)
-                        )
-                      }
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      min="0"
-                      placeholder="غير محدود"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الحد الأدنى للشراء
-                  </label>
-                  <div className="relative w-1/3">
-                    <input
-                      type="number"
-                      value={coupon.minPurchaseAmount}
-                      onChange={(e) =>
-                        updateCoupon(
-                          index,
-                          "minPurchaseAmount",
-                          parseFloat(e.target.value)
-                        )
-                      }
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                    />
-                    <span className="absolute left-3 top-2 text-gray-500">
-                      $
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
 
         <div className="flex justify-end gap-4">
           <Button type="button" variant="destructive">

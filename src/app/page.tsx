@@ -15,6 +15,7 @@ import Button from "@/components/ui/Button";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import Input from "../components/ui/Input";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -71,7 +72,7 @@ export default function Home() {
                 className="relative flex gap-2 sm:gap-1.5 w-full sm:max-w-md"
                 variants={fadeInUp}
               >
-                <input
+                <Input
                   type="text"
                   placeholder="ما الذي تبحث عنه؟"
                   className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full border-2 border-[#7b2cbf] focus:outline-none focus:border-[#7b2cbf] text-right"

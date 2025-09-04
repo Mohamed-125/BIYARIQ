@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiKey, FiCheck, FiCopy, FiAlertCircle, FiHelpCircle } from "react-icons/fi";
+import {
+  FiKey,
+  FiCheck,
+  FiCopy,
+  FiAlertCircle,
+  FiHelpCircle,
+} from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
 const containerVariants = {
@@ -45,7 +51,8 @@ const mockLicenses: License[] = [
     status: "active",
     activationDate: "2024-01-01",
     expiryDate: "2025-01-01",
-    instructions: "1. قم بفتح البرنامج\n2. انتقل إلى الإعدادات\n3. اختر 'تفعيل المنتج'\n4. أدخل مفتاح الترخيص\n5. اضغط على 'تفعيل'",
+    instructions:
+      "1. قم بفتح البرنامج\n2. انتقل إلى الإعدادات\n3. اختر 'تفعيل المنتج'\n4. أدخل مفتاح الترخيص\n5. اضغط على 'تفعيل'",
   },
   {
     id: "2",
@@ -54,14 +61,15 @@ const mockLicenses: License[] = [
     status: "inactive",
     activationDate: "2024-01-15",
     expiryDate: "2024-07-15",
-    instructions: "1. قم بتحميل البرنامج\n2. ثبت البرنامج على جهازك\n3. عند بدء التشغيل الأول، أدخل مفتاح الترخيص\n4. اتبع التعليمات على الشاشة",
+    instructions:
+      "1. قم بتحميل البرنامج\n2. ثبت البرنامج على جهازك\n3. عند بدء التشغيل الأول، أدخل مفتاح الترخيص\n4. اتبع التعليمات على الشاشة",
   },
 ];
 
 export default function LicensesPage() {
-  const [expandedInstructions, setExpandedInstructions] = useState<string | null>(
-    null
-  );
+  const [expandedInstructions, setExpandedInstructions] = useState<
+    string | null
+  >(null);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -123,7 +131,9 @@ export default function LicensesPage() {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1 space-y-4">
                 <div className="flex items-start justify-between">
-                  <h3 className="text-xl font-semibold">{license.productName}</h3>
+                  <h3 className="text-xl font-semibold">
+                    {license.productName}
+                  </h3>
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
                       license.status
@@ -148,11 +158,11 @@ export default function LicensesPage() {
                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                   <div>
                     <span className="font-medium">تاريخ التفعيل:</span>{" "}
-                    {new Date(license.activationDate).toLocaleDateString("ar-SA")}
+                    {new Date(license.activationDate).toLocaleDateString("ar")}
                   </div>
                   <div>
                     <span className="font-medium">تاريخ الانتهاء:</span>{" "}
-                    {new Date(license.expiryDate).toLocaleDateString("ar-SA")}
+                    {new Date(license.expiryDate).toLocaleDateString("ar")}
                   </div>
                 </div>
               </div>

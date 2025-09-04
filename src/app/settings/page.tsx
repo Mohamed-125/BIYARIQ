@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { Bell, CreditCard, Globe, Lock, User, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 interface Address {
   id: string;
@@ -129,15 +130,16 @@ export default function SettingsPage() {
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Tabs */}
-        <motion.div
-          className="md:w-1/4 space-y-2"
-          variants={itemVariants}
-        >
+        <motion.div className="md:w-1/4 space-y-2" variants={itemVariants}>
           {tabs.map((tab) => (
             <motion.button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${activeTab === tab.id ? "bg-purple-100 text-purple-800" : "hover:bg-gray-100"}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-lg transition-colors ${
+                activeTab === tab.id
+                  ? "bg-purple-100 text-purple-800"
+                  : "hover:bg-gray-100"
+              }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -161,35 +163,49 @@ export default function SettingsPage() {
                 exit={{ opacity: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-2xl font-semibold mb-6">معلومات الملف الشخصي</h2>
+                <h2 className="text-2xl font-semibold mb-6">
+                  معلومات الملف الشخصي
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">الاسم الأول</label>
-                    <input
+                    <label className="block text-sm font-medium mb-2">
+                      الاسم الأول
+                    </label>
+                    <Input
                       type="text"
-                      {...register("firstName", { required: "هذا الحقل مطلوب" })}
+                      {...register("firstName", {
+                        required: "هذا الحقل مطلوب",
+                      })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                     {errors.firstName && (
-                      <span className="text-red-500 text-sm">{errors.firstName.message}</span>
+                      <span className="text-red-500 text-sm">
+                        {errors.firstName.message}
+                      </span>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">الاسم الأخير</label>
-                    <input
+                    <label className="block text-sm font-medium mb-2">
+                      الاسم الأخير
+                    </label>
+                    <Input
                       type="text"
                       {...register("lastName", { required: "هذا الحقل مطلوب" })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                     {errors.lastName && (
-                      <span className="text-red-500 text-sm">{errors.lastName.message}</span>
+                      <span className="text-red-500 text-sm">
+                        {errors.lastName.message}
+                      </span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">البريد الإلكتروني</label>
-                  <input
+                  <label className="block text-sm font-medium mb-2">
+                    البريد الإلكتروني
+                  </label>
+                  <Input
                     type="email"
                     {...register("email", {
                       required: "هذا الحقل مطلوب",
@@ -201,7 +217,9 @@ export default function SettingsPage() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                   />
                   {errors.email && (
-                    <span className="text-red-500 text-sm">{errors.email.message}</span>
+                    <span className="text-red-500 text-sm">
+                      {errors.email.message}
+                    </span>
                   )}
                 </div>
 
@@ -210,32 +228,32 @@ export default function SettingsPage() {
                   <h3 className="text-xl font-semibold">العناوين</h3>
                   <div className="bg-gray-50 p-4 rounded-lg mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
+                      <Input
                         type="text"
                         placeholder="الشارع"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="رقم المنزل"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="الطابق"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="المدينة"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="المنطقة"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="الرمز البريدي"
                         className="w-full p-3 border border-gray-300 rounded-lg"
@@ -253,7 +271,9 @@ export default function SettingsPage() {
                       <p>{`${address.city}, ${address.state} ${address.postalCode}`}</p>
                       <div className="flex justify-end mt-2 space-x-2">
                         <Button className="px-3 py-1 text-sm">تعديل</Button>
-                        <Button className="px-3 py-1 text-sm bg-red-500">حذف</Button>
+                        <Button className="px-3 py-1 text-sm bg-red-500">
+                          حذف
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -264,12 +284,12 @@ export default function SettingsPage() {
                   <h3 className="text-xl font-semibold">أرقام الهاتف</h3>
                   <div className="bg-gray-50 p-4 rounded-lg mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
+                      <Input
                         type="tel"
                         placeholder="رقم الهاتف"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="التسمية (منزل، عمل، الخ)"
                         className="w-full p-3 border border-gray-300 rounded-lg"
@@ -289,7 +309,9 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex space-x-2">
                         <Button className="px-3 py-1 text-sm">تعديل</Button>
-                        <Button className="px-3 py-1 text-sm bg-red-500">حذف</Button>
+                        <Button className="px-3 py-1 text-sm bg-red-500">
+                          حذف
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -298,24 +320,34 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold">تغيير كلمة المرور</h3>
                   <div className="relative">
-                    <label className="block text-sm font-medium mb-2">كلمة المرور الحالية</label>
-                    <input
+                    <label className="block text-sm font-medium mb-2">
+                      كلمة المرور الحالية
+                    </label>
+                    <Input
                       type={showCurrentPassword ? "text" : "password"}
                       {...register("currentPassword")}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      onClick={() =>
+                        setShowCurrentPassword(!showCurrentPassword)
+                      }
                       className="absolute left-3 top-9 text-gray-500"
                     >
-                      {showCurrentPassword ? <X className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                      {showCurrentPassword ? (
+                        <X className="w-5 h-5" />
+                      ) : (
+                        <Lock className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
 
                   <div className="relative">
-                    <label className="block text-sm font-medium mb-2">كلمة المرور الجديدة</label>
-                    <input
+                    <label className="block text-sm font-medium mb-2">
+                      كلمة المرور الجديدة
+                    </label>
+                    <Input
                       type={showNewPassword ? "text" : "password"}
                       {...register("newPassword")}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
@@ -325,23 +357,35 @@ export default function SettingsPage() {
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute left-3 top-9 text-gray-500"
                     >
-                      {showNewPassword ? <X className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                      {showNewPassword ? (
+                        <X className="w-5 h-5" />
+                      ) : (
+                        <Lock className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
 
                   <div className="relative">
-                    <label className="block text-sm font-medium mb-2">تأكيد كلمة المرور الجديدة</label>
-                    <input
+                    <label className="block text-sm font-medium mb-2">
+                      تأكيد كلمة المرور الجديدة
+                    </label>
+                    <Input
                       type={showConfirmPassword ? "text" : "password"}
                       {...register("confirmPassword")}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute left-3 top-9 text-gray-500"
                     >
-                      {showConfirmPassword ? <X className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                      {showConfirmPassword ? (
+                        <X className="w-5 h-5" />
+                      ) : (
+                        <Lock className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -369,22 +413,22 @@ export default function SettingsPage() {
                 {showAddAddress && (
                   <div className="bg-gray-50 p-4 rounded-lg mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
+                      <Input
                         type="text"
                         placeholder="الشارع"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="المدينة"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="المنطقة"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="الرمز البريدي"
                         className="w-full p-3 border border-gray-300 rounded-lg"
@@ -443,12 +487,12 @@ export default function SettingsPage() {
                 {showAddPhone && (
                   <div className="bg-gray-50 p-4 rounded-lg mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
+                      <Input
                         type="tel"
                         placeholder="رقم الهاتف"
                         className="w-full p-3 border border-gray-300 rounded-lg"
                       />
-                      <input
+                      <Input
                         type="text"
                         placeholder="التسمية (منزل، عمل، الخ)"
                         className="w-full p-3 border border-gray-300 rounded-lg"
@@ -496,35 +540,45 @@ export default function SettingsPage() {
                 exit={{ opacity: 0 }}
                 className="space-y-6"
               >
-                <h2 className="text-2xl font-semibold mb-6">إعدادات الإشعارات</h2>
+                <h2 className="text-2xl font-semibold mb-6">
+                  إعدادات الإشعارات
+                </h2>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">إشعارات البريد الإلكتروني</label>
-                    <input
+                    <label className="text-sm font-medium">
+                      إشعارات البريد الإلكتروني
+                    </label>
+                    <Input
                       type="checkbox"
                       {...register("emailNotifications")}
                       className="w-5 h-5 text-purple-600 rounded focus:ring-purple-400"
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">الإشعارات المنبثقة</label>
-                    <input
+                    <label className="text-sm font-medium">
+                      الإشعارات المنبثقة
+                    </label>
+                    <Input
                       type="checkbox"
                       {...register("pushNotifications")}
                       className="w-5 h-5 text-purple-600 rounded focus:ring-purple-400"
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">تحديثات الطلبات</label>
-                    <input
+                    <label className="text-sm font-medium">
+                      تحديثات الطلبات
+                    </label>
+                    <Input
                       type="checkbox"
                       {...register("orderUpdates")}
                       className="w-5 h-5 text-purple-600 rounded focus:ring-purple-400"
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">رسائل البريد الترويجية</label>
-                    <input
+                    <label className="text-sm font-medium">
+                      رسائل البريد الترويجية
+                    </label>
+                    <Input
                       type="checkbox"
                       {...register("promotionalEmails")}
                       className="w-5 h-5 text-purple-600 rounded focus:ring-purple-400"
@@ -556,8 +610,10 @@ export default function SettingsPage() {
                   <div className="bg-gray-50 p-4 rounded-lg mb-4">
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">رقم البطاقة</label>
-                        <input
+                        <label className="block text-sm font-medium mb-2">
+                          رقم البطاقة
+                        </label>
+                        <Input
                           type="text"
                           placeholder="**** **** **** ****"
                           className="w-full p-3 border border-gray-300 rounded-lg"
@@ -565,8 +621,10 @@ export default function SettingsPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-2">الاسم على البطاقة</label>
-                        <input
+                        <label className="block text-sm font-medium mb-2">
+                          الاسم على البطاقة
+                        </label>
+                        <Input
                           type="text"
                           className="w-full p-3 border border-gray-300 rounded-lg"
                         />
@@ -574,8 +632,10 @@ export default function SettingsPage() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">تاريخ الانتهاء</label>
-                          <input
+                          <label className="block text-sm font-medium mb-2">
+                            تاريخ الانتهاء
+                          </label>
+                          <Input
                             type="text"
                             placeholder="MM/YY"
                             className="w-full p-3 border border-gray-300 rounded-lg"
@@ -583,8 +643,10 @@ export default function SettingsPage() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">CVV</label>
-                          <input
+                          <label className="block text-sm font-medium mb-2">
+                            CVV
+                          </label>
+                          <Input
                             type="text"
                             className="w-full p-3 border border-gray-300 rounded-lg"
                           />
@@ -614,14 +676,16 @@ export default function SettingsPage() {
                           <p className="font-medium">
                             **** **** **** {card.cardNumber.slice(-4)}
                           </p>
-                          <p className="text-sm text-gray-500">{card.cardName}</p>
+                          <p className="text-sm text-gray-500">
+                            {card.cardName}
+                          </p>
                           <p className="text-sm text-gray-500">
                             تنتهي في {card.expiryDate}
                           </p>
                         </div>
                         <div className="flex flex-col items-end space-y-2">
                           <div className="flex items-center space-x-2">
-                            <input
+                            <Input
                               type="radio"
                               checked={card.isDefault}
                               onChange={() => {
@@ -629,7 +693,9 @@ export default function SettingsPage() {
                               }}
                               className="w-4 h-4 text-purple-600"
                             />
-                            <label className="text-sm">البطاقة الافتراضية</label>
+                            <label className="text-sm">
+                              البطاقة الافتراضية
+                            </label>
                           </div>
                           <div className="flex space-x-2">
                             <Button className="px-3 py-1 text-sm">تعديل</Button>
@@ -655,7 +721,9 @@ export default function SettingsPage() {
               >
                 <h2 className="text-2xl font-semibold mb-6">إعدادات اللغة</h2>
                 <div>
-                  <label className="block text-sm font-medium mb-2">اختر اللغة</label>
+                  <label className="block text-sm font-medium mb-2">
+                    اختر اللغة
+                  </label>
                   <select
                     {...register("language")}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"

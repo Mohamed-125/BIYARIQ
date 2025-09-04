@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
+import Input from "@/components/ui/Input";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -103,10 +104,10 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الاسم الأول
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("firstName", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className=" rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.firstName && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -117,7 +118,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الاسم الأخير
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("lastName", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -131,7 +132,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   البريد الإلكتروني
                 </label>
-                <input
+                <Input
                   type="email"
                   {...register("email", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -145,7 +146,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   رقم الجوال
                 </label>
-                <input
+                <Input
                   type="tel"
                   {...register("phone", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -159,7 +160,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الموقع
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("location", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -182,7 +183,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   اسم المتجر
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("storeName", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -196,7 +197,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   نوع المنتجات الرقمية
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("productType", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -224,7 +225,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   شعار المتجر
                 </label>
-                <input
+                <Input
                   type="file"
                   accept="image/*"
                   {...register("logo", { required: true })}
@@ -307,7 +308,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   اسم البنك
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("bankName", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -321,7 +322,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   اسم صاحب الحساب
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("accountHolder", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -335,7 +336,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   رقم الآيبان
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("iban", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -349,7 +350,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   بريد PayPal
                 </label>
-                <input
+                <Input
                   type="email"
                   {...register("paypalEmail", { required: true })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -389,7 +390,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الرخصة التجارية
                 </label>
-                <input
+                <Input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   {...register("businessLicense", { required: true })}
@@ -404,7 +405,7 @@ export default function SellWithUsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الهوية الوطنية
                 </label>
-                <input
+                <Input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   {...register("idCard", { required: true })}
@@ -424,7 +425,7 @@ export default function SellWithUsPage() {
           >
             <div className="flex items-start">
               <div className="flex items-center h-5">
-                <input
+                <Input
                   type="checkbox"
                   {...register("agreeToTerms", { required: true })}
                   className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded"
@@ -435,7 +436,9 @@ export default function SellWithUsPage() {
                   أوافق على الشروط والأحكام وسياسة العمولة
                 </label>
                 {errors.agreeToTerms && (
-                  <p className="text-red-500">يجب الموافقة على الشروط والأحكام</p>
+                  <p className="text-red-500">
+                    يجب الموافقة على الشروط والأحكام
+                  </p>
                 )}
               </div>
             </div>

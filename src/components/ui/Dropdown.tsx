@@ -7,7 +7,7 @@ interface DropdownProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
   align?: "start" | "center" | "end";
   side?: "top" | "bottom";
 }
@@ -42,7 +42,7 @@ export function Dropdown({
   children,
   trigger,
   open,
-  onOpenChange,
+  setOpen,
   align = "end",
   side = "bottom",
 }: DropdownProps) {
@@ -53,7 +53,7 @@ export function Dropdown({
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (triggerRef && !triggerRef.contains(event.target as Node)) {
-        onOpenChange(false);
+        setOpen(false);
       }
     };
 
@@ -64,11 +64,11 @@ export function Dropdown({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open, onOpenChange, triggerRef]);
+  }, [open, setOpen, triggerRef]);
 
   return (
     <div className="relative" ref={setTriggerRef}>
-      <div className="cursor-pointer " onClick={() => onOpenChange(!open)}>
+      <div className="cursor-pointer " onClick={() => setOpen(!open)}>
         {trigger}
       </div>
       <AnimatePresence>

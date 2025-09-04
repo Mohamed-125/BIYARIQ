@@ -66,25 +66,37 @@ const itemVariants: Variants = {
 };
 
 const menuData = [
+  { title: "الرئيسية", to: "" },
+
   {
     title: "منتجات فعلية",
-    to: "/physical-products",
+    to: "physical-products",
     links: [
-      { title: "ملابس", to: "/clothes" },
-      { title: "أجهزة", to: "/devices" },
+      { title: "ملابس", to: "clothes" },
+      { title: "أجهزة", to: "devices" },
       {
         title: "إكسسوارات",
-        links: [{ title: "ساعات" }, { title: "نظارات" }],
+        links: [{ title: "ساعات", to: "watches" }],
       },
     ],
   },
   {
     title: "منتجات رقمية",
-    links: [{ title: "كتب PDF" }, { title: "برامج" }, { title: "تصاميم" }],
+    to: "digital-products",
+    links: [
+      { title: "كتب PDF", to: "books" },
+      { title: "برامج", to: "programs" },
+      { title: "تصاميم", to: "design" },
+    ],
   },
   {
     title: "الدورات",
-    links: [{ title: "برمجة" }, { title: "تصميم" }, { title: "تسويق" }],
+    to: "courses",
+    links: [
+      { title: "برمجة", to: "programming" },
+      { title: "تصميم", to: "design" },
+      { title: "تسويق", to: "markting" },
+    ],
   },
 ] as MenuItems;
 
@@ -96,20 +108,20 @@ type MenuItem = {
 
 type MenuItems = MenuItem[];
 
-// RecursiveMenu component that behaves differently for desktop (hover) and sidebar (click toggle)
 function RecursiveMenu({
   items,
-  isSidebar = false,
   isChild = false,
+  parentPath = "",
+  toggleSidebar,
 }: {
-  items?: MenuItems;
-  isSidebar?: boolean;
+  items?: MenuItem[];
   isChild?: boolean;
+  parentPath?: string;
+  toggleSidebar: () => void;
 }) {
   const [openIndexes, setOpenIndexes] = useState<{ [key: number]: boolean }>(
     {}
   );
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const toggleIndex = (idx: number) => {
     setOpenIndexes((prev) => ({
@@ -118,151 +130,42 @@ function RecursiveMenu({
     }));
   };
 
-  const handleMouseEnter = (idx: number) => {
-    if (!isSidebar) setHoveredIndex(idx);
-  };
-
-  const handleMouseLeave = () => {
-    if (!isSidebar) setHoveredIndex(null);
-  };
-
   return (
-    <ul
-      className={`${isSidebar ? "flex flex-col" : "flex items-center "} ${
-        isChild ? "!flex-col !items-start" : ""
-      }`}
-    >
+    <ul className={isChild ? "ml-4 border-l border-gray-200 pl-4" : ""}>
       {items?.map((item, idx) => {
-        const hasChildren = !!item.links;
+        // const currentPath = parentPath
+        //   ? `${parentPath}/${item.to}`
+        //   : `/${item.to}`;
 
-        if (isSidebar) {
-          return (
-            <li key={idx} className="w-full">
-              <button
-                onClick={() => hasChildren && toggleIndex(idx)}
-                className={`
-                  w-full px-4 py-2.5 text-[15px] font-medium flex items-center justify-between
-                  ${
-                    openIndexes[idx]
-                      ? "bg-purple-50 text-purple-700"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }
-                  transition-colors duration-200 rounded-lg
-                `}
-              >
-                <span>{item.title}</span>
-                {hasChildren && (
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      openIndexes[idx] ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                )}
-              </button>
-              {hasChildren && (
-                <div
-                  className={`
-                    overflow-hidden transition-all duration-200 ease-in-out
-                    ${
-                      openIndexes[idx]
-                        ? "max-h-96 opacity-100"
-                        : "max-h-0 opacity-0"
-                    }
-                  `}
-                >
-                  <div className="pr-4 py-2">
-                    <RecursiveMenu
-                      items={item.links}
-                      isSidebar={true}
-                      isChild={true}
-                    />
-                  </div>
-                </div>
-              )}
-            </li>
-          );
-        }
+        const currentPath = item.to === "الرئيسية" ? "" : "products";
+        const isOpen = openIndexes[idx];
 
         return (
-          <li
-            key={idx}
-            className="relative"
-            onMouseEnter={() => handleMouseEnter(idx)}
-            onMouseLeave={handleMouseLeave}
-          >
-            {hasChildren ? (
+          <li key={item.title} className="relative">
+            {item.links ? (
               <>
                 <button
-                  className={`
-                    px-4 py-2.5 text-[15px] font-medium rounded-lg flex items-center gap-1
-                    ${
-                      hoveredIndex === idx
-                        ? "bg-purple-50 text-purple-700"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }
-                    transition-colors duration-200
-                  `}
+                  onClick={() => toggleIndex(idx)}
+                  className="w-full text-left flex justify-between items-center px-4 py-2.5 text-[15px] font-medium rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  {item.title}
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      hoveredIndex === idx ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  <span>{item.title}</span>
+                  <span className="text-gray-400">{isOpen ? "−" : "+"}</span>
                 </button>
 
-                <div
-                  className={`
-                    absolute  ${
-                      isChild ? "!flex-col bottom-5 !items-start " : ""
-                    }   ${
-                    isChild ? "left-[-80%] top-[0%]" : "left-[-70px] top-[100%]"
-                  } pt-2 w-fit opacity-0 flex flex-col invisible translate-y-1 z-50
-                    ${
-                      hoveredIndex === idx
-                        ? "!opacity-100 !visible !translate-y-0"
-                        : ""
-                    }
-                    transition-all duration-200
-                  `}
-                >
-                  <div
-                    className="
-                    bg-white rounded-lg shadow-lg ring-1  ring-black/5 p-2
-                    animate-in fade-in slide-in-from-top-2 duration-200
-                  "
-                  >
-                    <RecursiveMenu items={item.links} isChild={true} />
-                  </div>
-                </div>
+                {isOpen && (
+                  <RecursiveMenu
+                    toggleSidebar={toggleSidebar}
+                    items={item.links}
+                    parentPath={currentPath}
+                    isChild
+                  />
+                )}
               </>
             ) : (
               <Link
-                href={`/${item.to}`}
-                className={`
-                  block px-4 py-2.5 text-[15px] font-medium rounded-lg
-                  text-gray-700 hover:bg-gray-50 transition-colors duration-200
-                `}
+                href={`${currentPath}`}
+                onClick={toggleSidebar}
+                className="block px-4 py-2.5 text-[15px] font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 {item.title}
               </Link>
@@ -315,10 +218,7 @@ export default function Navbar() {
               <Search className="text-purple-600" size={20} />
             </button>
 
-            <SearchModal
-              open={searchModalOpen}
-              onOpenChange={setSearchModalOpen}
-            />
+            <SearchModal open={searchModalOpen} setOpen={setSearchModalOpen} />
           </motion.div>
 
           {/* Center - Logo */}
@@ -335,7 +235,9 @@ export default function Navbar() {
               {darkMode ? <FiSun /> : <FiMoon />}
             </button>
             <div className="text-xl">
-              <FiHeart className="cursor-pointer hover:text-purple-600 transition-colors" />
+              <Link href={"/wishlist"} className="text-xl">
+                <FiHeart className="cursor-pointer hover:text-purple-600 transition-colors" />
+              </Link>
             </div>
             <Link href={"/cart"} className="text-xl">
               <FiShoppingCart className="cursor-pointer hover:text-purple-600 transition-colors" />
@@ -352,10 +254,7 @@ export default function Navbar() {
                 <Button onClick={() => setLoginModalOpen(true)}>
                   تسجيل الدخول
                 </Button>
-                <LoginModal
-                  open={loginModalOpen}
-                  onOpenChange={setLoginModalOpen}
-                />
+                <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />
               </>
             )}
           </div>
@@ -374,7 +273,7 @@ export default function Navbar() {
         </div>
 
         <div className="p-4">
-          <RecursiveMenu items={menuData} isSidebar={true} />
+          <RecursiveMenu items={menuData} toggleSidebar={toggleSidebar} />
         </div>
       </div>
 
@@ -416,7 +315,7 @@ const UserDropdown = ({
   return (
     <Dropdown
       open={dropdownOpen}
-      onOpenChange={setDropdownOpen}
+      setOpen={setDropdownOpen}
       trigger={<UserAvatar />}
       align="start"
     >

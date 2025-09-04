@@ -3,6 +3,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
+import Input from "../../components/ui/Input";
+import { label, textarea, button } from "framer-motion/client";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -97,10 +99,9 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الاسم الأول
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("firstName", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.firstName && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -111,10 +112,9 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   الاسم الأخير
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("lastName", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.lastName && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -125,10 +125,9 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   البريد الإلكتروني
                 </label>
-                <input
+                <Input
                   type="email"
                   {...register("email", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.email && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -139,11 +138,7 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   رقم الجوال
                 </label>
-                <input
-                  type="tel"
-                  {...register("phone", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="tel" {...register("phone", { required: true })} />
                 {errors.phone && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
                 )}
@@ -153,11 +148,7 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   المدينة
                 </label>
-                <input
-                  type="text"
-                  {...register("city", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("city", { required: true })} />
                 {errors.city && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
                 )}
@@ -170,16 +161,17 @@ export default function BecomeAffiliatePage() {
             variants={itemVariants}
             className="bg-white rounded-xl p-6 shadow-sm"
           >
-            <h2 className="text-xl font-semibold mb-4">معلومات الحساب البنكي</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              معلومات الحساب البنكي
+            </h2>
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   اسم البنك
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("bankName", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.bankName && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -190,10 +182,9 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   اسم صاحب الحساب
                 </label>
-                <input
+                <Input
                   type="text"
                   {...register("accountHolder", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 {errors.accountHolder && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
@@ -204,11 +195,7 @@ export default function BecomeAffiliatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   رقم الآيبان
                 </label>
-                <input
-                  type="text"
-                  {...register("iban", { required: true })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("iban", { required: true })} />
                 {errors.iban && (
                   <span className="text-red-500 text-sm">هذا الحقل مطلوب</span>
                 )}
@@ -221,50 +208,36 @@ export default function BecomeAffiliatePage() {
             variants={itemVariants}
             className="bg-white rounded-xl p-6 shadow-sm"
           >
-            <h2 className="text-xl font-semibold mb-4">حسابات التواصل الاجتماعي</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              حسابات التواصل الاجتماعي
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   انستغرام
                 </label>
-                <input
-                  type="text"
-                  {...register("instagram")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("instagram")} />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   تويتر
                 </label>
-                <input
-                  type="text"
-                  {...register("twitter")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("twitter")} />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   تيك توك
                 </label>
-                <input
-                  type="text"
-                  {...register("tiktok")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("tiktok")} />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   يوتيوب
                 </label>
-                <input
-                  type="text"
-                  {...register("youtube")}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                <Input type="text" {...register("youtube")} />
               </div>
             </div>
           </motion.div>
@@ -327,10 +300,9 @@ export default function BecomeAffiliatePage() {
           >
             <div className="flex items-start">
               <div className="flex items-center h-5">
-                <input
+                <Input
                   type="checkbox"
                   {...register("agreeToTerms", { required: true })}
-                  className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded"
                 />
               </div>
               <div className="mr-3 text-sm">
@@ -338,7 +310,9 @@ export default function BecomeAffiliatePage() {
                   أوافق على الشروط والأحكام وسياسة العمولة
                 </label>
                 {errors.agreeToTerms && (
-                  <p className="text-red-500">يجب الموافقة على الشروط والأحكام</p>
+                  <p className="text-red-500">
+                    يجب الموافقة على الشروط والأحكام
+                  </p>
                 )}
               </div>
             </div>

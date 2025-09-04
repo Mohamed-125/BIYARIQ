@@ -17,17 +17,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import {
-  label,
-  input,
-  p,
-  div,
-  button,
-  form,
-  h2,
-  h3,
-} from "framer-motion/client";
+
 import Button from "../../../../../../components/ui/Button";
+import Input from "@/components/ui/Input";
 
 interface Lesson {
   id: string;

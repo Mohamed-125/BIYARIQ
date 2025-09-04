@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, X } from "lucide-react";
+import Input from "@/components/ui/Input";
 
 interface FilterOption {
   value: string | number;
@@ -71,7 +72,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 key={option.value}
                 className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer group"
               >
-                <input
+                <Input
                   type="checkbox"
                   checked={
                     selectedFilters[filter.id]?.includes(option.value) || false
@@ -96,7 +97,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       case "range":
         return (
           <div className="space-y-2">
-            <input
+            <Input
               type="range"
               min={filter.min}
               max={filter.max}
@@ -132,7 +133,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 key={option.value}
                 className="flex items-center space-x-3 rtl:space-x-reverse cursor-pointer group"
               >
-                <input
+                <Input
                   type="radio"
                   name={filter.id}
                   value={option.value}

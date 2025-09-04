@@ -88,7 +88,7 @@ const StorePage = () => {
         className="relative w-full h-36 md:h-46 "
       ></motion.div>
 
-      <SharePopup open={isShareOpen} onOpenChange={setIsShareOpen} />
+      <SharePopup open={isShareOpen} setOpen={setIsShareOpen} />
       <div className="flex justify-between gap-6 my-6">
         <div className="flex gap-3 items-center">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white bg-white shadow-lg">

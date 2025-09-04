@@ -5,6 +5,8 @@ import { motion, Variants } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CreditCard, Wallet, Clock } from "lucide-react";
+import Input from "../../components/ui/Input";
+import { div } from "framer-motion/client";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -55,11 +57,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState("");
 
-  const handlePayment = () => {
-    // Here you would integrate with your payment gateway
-    // After successful payment:
-    router.push("/my-courses");
-  };
+  const handlePayment = () => {};
 
   return (
     <motion.div
@@ -127,6 +125,39 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                 </div>
+                {method.id === "credit_card" &&
+                  selectedMethod === "credit_card" && (
+                    <div className="mt-6 space-y-4">
+                      <Input
+                        type="text"
+                        placeholder="رقم البطاقة"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          type="text"
+                          placeholder="تاريخ الانتهاء (MM/YY)"
+                          className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="CVV"
+                          className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                {method.id === "digital_wallet" &&
+                  selectedMethod === "digital_wallet" && (
+                    <div className="mt-6 space-y-4">
+                      <Input
+                        type="text"
+                        placeholder="بريد المحفظة أو رقم الهاتف"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  )}
               </div>
             ))}
           </motion.div>
@@ -142,6 +173,34 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2 text-gray-600">
                 <Clock size={16} />
                 <span>15 ساعة</span>
+              </div>
+
+              {/* Display variants, color, and size */}
+              <div className="mt-2 flex flex-wrap gap-1.5 text-sm text-gray-600">
+                {/* Example of variants display - in a real app, this would come from the cart/order data */}
+                <div className="flex flex-wrap gap-2 mb-1">
+                  <span className="bg-gray-100 px-2 py-1 rounded-md">
+                    النسخة: الكاملة
+                  </span>
+                </div>
+
+                {/* Example of color display */}
+                <span className="inline-flex items-center gap-1 mr-2">
+                  <span className="font-medium">اللون:</span>
+                  <span className="flex items-center gap-1">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full border border-gray-300"
+                      style={{ backgroundColor: "#3B82F6" }}
+                    ></span>
+                    أزرق
+                  </span>
+                </span>
+
+                {/* Example of size display */}
+                <span className="inline-flex items-center gap-1">
+                  <span className="font-medium">المقاس:</span>
+                  <span>متوسط</span>
+                </span>
               </div>
             </div>
 

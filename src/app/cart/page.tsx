@@ -6,6 +6,8 @@ import { Minus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { div } from "framer-motion/client";
 import Button from "@/components/ui/Button";
+import Link from "next/link";
+import Input from "@/components/ui/Input";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -87,6 +89,9 @@ const Page: React.FC = () => {
     },
   };
 
+  // Combine all product categories
+  const allItems = [...digitalItems, ...physicalItems, ...courseItems];
+
   return (
     <>
       {/* Header */}
@@ -102,33 +107,6 @@ const Page: React.FC = () => {
 
       {/* Container */}
       <div className="max-w-[1200px] mx-auto p-8 fade-in">
-        {/* Tabs */}
-        <motion.div
-          variants={parentVariants}
-          initial="initial"
-          animate="animate"
-          className="bg-white rounded-lg p-4 mb-6 flex gap-2.5"
-        >
-          {["digital", "physical", "courses"].map((tab) => (
-            <motion.button
-              variants={childVariants}
-              key={tab}
-              className={`px-6 py-2 rounded-md border border-gray-300 cursor-pointer ${
-                activeTab === tab
-                  ? "bg-[#7b2cbf] text-white font-bold"
-                  : "text-gray-600"
-              }`}
-              onClick={() => setActiveTab(tab as typeof activeTab)}
-            >
-              {tab === "digital"
-                ? "المنتجات الرقمية"
-                : tab === "physical"
-                ? "المنتجات المادية"
-                : "الدورات التدريبية"}
-            </motion.button>
-          ))}
-        </motion.div>
-        {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
           {/* Items */}
           <motion.div
@@ -137,7 +115,7 @@ const Page: React.FC = () => {
             animate="visible"
           >
             <AnimatePresence mode="wait">
-              {items.length === 0 ? (
+              {allItems.length === 0 ? (
                 <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
@@ -149,15 +127,14 @@ const Page: React.FC = () => {
                 </motion.div>
               ) : (
                 <motion.div
-                  key={activeTab}
-                  variants={tabContentVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
+                  key="all-products"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.15, ease: "easeOut" }}
                 >
                   <AnimatePresence>
-                    {items.map((item) => (
+                    {allItems.map((item) => (
                       <motion.div
                         key={item.id}
                         variants={itemVariants}
@@ -185,7 +162,51 @@ const Page: React.FC = () => {
                             )}
                           </div>
 
-                          {activeTab !== "courses" && (
+                          {/* Display variants, color, and size */}
+                          <div className="mt-2 flex flex-wrap gap-1.5 text-sm text-gray-600">
+                            {item.variants && item.variants.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-1">
+                                {item.variants.map((variant, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="bg-gray-100 px-2 py-1 rounded-md"
+                                  >
+                                    {variant.name}: {variant.value}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {item.color && (
+                              <span className="inline-flex items-center gap-1 mr-2">
+                                <span className="font-medium">اللون:</span>
+                                <span className="flex items-center gap-1">
+                                  <span
+                                    className="inline-block w-3 h-3 rounded-full border border-gray-300"
+                                    style={{
+                                      backgroundColor:
+                                        item.colorCode || item.color,
+                                    }}
+                                  ></span>
+                                  {item.color}
+                                </span>
+                              </span>
+                            )}
+                            {item.size && (
+                              <span className="inline-flex items-center gap-1">
+                                <span className="font-medium">المقاس:</span>
+                                <span>{item.size}</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Only show quantity controls for non-course products */}
+                          {"duration" in item ? (
+                            <div className="text-sm text-gray-500 mt-2">
+                              <span>{item.duration} ساعة</span> •{" "}
+                              <span>{item.lectures} محاضرة</span> •{" "}
+                              <span>{item.level}</span>
+                            </div>
+                          ) : (
                             <div className="flex mt-4 items-center gap-1 mb-2">
                               <Button
                                 variant={"ghost"}
@@ -216,13 +237,6 @@ const Page: React.FC = () => {
                               </Button>
                             </div>
                           )}
-                          {activeTab === "courses" && (
-                            <div className="text-sm text-gray-500 mt-2">
-                              <span>{item.duration} ساعة</span> •{" "}
-                              <span>{item.lectures} محاضرة</span> •{" "}
-                              <span>{item.level}</span>
-                            </div>
-                          )}
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <button
@@ -251,7 +265,6 @@ const Page: React.FC = () => {
               )}
             </AnimatePresence>
           </motion.div>
-
           {/* Summary */}
           {items.length > 0 && (
             <div className="sticky top-4">
@@ -286,11 +299,13 @@ const Page: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <Button size={"full"} className="mt-5">
-                  إتمام الشراء
-                </Button>
+                <Link href={"checkout"}>
+                  <Button size={"full"} className="mt-5">
+                    إتمام الشراء
+                  </Button>
+                </Link>
                 <div className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.1)]">
-                  <input
+                  <Input
                     type="text"
                     placeholder="أدخل رمز القسيمة"
                     className="w-full p-2 border border-[rgba(0,0,0,0.1)] rounded-lg mb-2 text-right"

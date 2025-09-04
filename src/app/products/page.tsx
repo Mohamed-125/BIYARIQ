@@ -7,6 +7,7 @@ import { Product } from "@/context/CartContext";
 import FilterSidebar from "../../components/FilterSidebar";
 import ProductCard from "@/components/Card/ProductCard";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 const filterConfig = {
   category: "laptops",
@@ -237,15 +238,8 @@ const Page = () => {
 
       {/* Top Filters */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <Button
-          onClick={() => openModal("product")}
-          className="flex items-center gap-2 bg-[#7b2cbf] text-white"
-        >
-          <Plus size={20} />
-          إضافة منتج
-        </Button>
         <div className="flex-1 min-w-[200px] max-w-xl">
-          <input
+          <Input
             type="text"
             placeholder="ابحث عن المنتجات..."
             value={searchQuery}

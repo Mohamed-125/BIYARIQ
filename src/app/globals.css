@@ -14,8 +14,8 @@
   /* Original variables */
   --background: #ffffff;
   --foreground: #171717;
-  --section-bg: lch(66.67% 61.77 305.6 / 0.13);
-
+  --section: lch(66.67% 61.77 305.6 / 0.13);
+  --secondray: #0a0a1a;
   /* Colors extracted from the provided images */
   --primary: oklch(55.8% 0.288 302.321); /* Main purple color from the logo */
   --primary-dark: #0a0a1a; /* Dark background color */

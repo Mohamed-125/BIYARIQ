@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Search, Calendar } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
+import Input from "@/components/ui/Input";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,7 +42,10 @@ interface ReturnedOrder {
   status: ReturnStatus;
 }
 
-const statusColors: Record<ReturnStatus, { bg: string; text: string; label: string }> = {
+const statusColors: Record<
+  ReturnStatus,
+  { bg: string; text: string; label: string }
+> = {
   pending: {
     bg: "bg-yellow-100",
     text: "text-yellow-800",
@@ -117,7 +121,10 @@ export default function ReturnedOrdersPage() {
       return acc;
     }, {} as Record<string, ReturnedOrder[]>);
 
-  const handleStatusUpdate = async (orderId: string, newStatus: ReturnStatus) => {
+  const handleStatusUpdate = async (
+    orderId: string,
+    newStatus: ReturnStatus
+  ) => {
     try {
       // In a real application, this would be an API call
       // const response = await fetch(`/api/returns/${orderId}`, {
@@ -161,7 +168,7 @@ export default function ReturnedOrdersPage() {
         <div className="flex gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
+            <Input
               type="text"
               placeholder="البحث في الطلبات المرتجعة..."
               value={searchTerm}
@@ -171,7 +178,7 @@ export default function ReturnedOrdersPage() {
           </div>
           <div className="relative">
             <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
+            <Input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -206,7 +213,9 @@ export default function ReturnedOrdersPage() {
                         </p>
                       </div>
                       <span
-                        className={`inline-block px-2 py-1 text-xs rounded-full ${statusColors[order.status].bg} ${statusColors[order.status].text}`}
+                        className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          statusColors[order.status].bg
+                        } ${statusColors[order.status].text}`}
                       >
                         {statusColors[order.status].label}
                       </span>
@@ -216,14 +225,18 @@ export default function ReturnedOrdersPage() {
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
-                          onClick={() => handleStatusUpdate(order.id, "approved")}
+                          onClick={() =>
+                            handleStatusUpdate(order.id, "approved")
+                          }
                           className="flex-1"
                         >
                           قبول الإرجاع
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => handleStatusUpdate(order.id, "rejected")}
+                          onClick={() =>
+                            handleStatusUpdate(order.id, "rejected")
+                          }
                           className="flex-1"
                         >
                           رفض الإرجاع

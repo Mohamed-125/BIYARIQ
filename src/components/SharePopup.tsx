@@ -19,10 +19,10 @@ type ShareButton = {
 
 interface SharePopupProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  setOpen: (open: boolean) => void;
 }
 
-export function SharePopup({ open, onOpenChange }: SharePopupProps) {
+export function SharePopup({ open, setOpen }: SharePopupProps) {
   const shareUrl = "https://www.example.com";
   const shareButtons = [
     {
@@ -43,7 +43,7 @@ export function SharePopup({ open, onOpenChange }: SharePopupProps) {
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} setOpen={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>مشاركة المنتج</DialogTitle>
@@ -65,7 +65,7 @@ export function SharePopup({ open, onOpenChange }: SharePopupProps) {
         </div>
 
         <DialogFooter>
-          <Button className="mx-auto" onClick={() => onOpenChange(false)}>
+          <Button className="mx-auto" onClick={() => setOpen(false)}>
             إغلاق
           </Button>
         </DialogFooter>

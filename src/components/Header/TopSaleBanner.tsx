@@ -4,7 +4,7 @@ import { FiX } from "react-icons/fi";
 
 export default function TopSaleBanner() {
   // Set your sale end date here
-  const saleEndDate = new Date("2025-08-20T23:59:59").getTime(); // Example: 20 Aug 2025
+  const saleEndDate = new Date("2026-08-20T23:59:59").getTime(); // Example: 20 Aug 2025
 
   // State for countdown parts
   const [timeLeft, setTimeLeft] = useState({
@@ -52,24 +52,26 @@ export default function TopSaleBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-pink-400 via-purple-500 to-indigo-600 text-white px-6 py-3 rounded-md shadow-lg flex justify-between items-center max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-center md:text-right font-semibold text-lg">
-        <span>🔥 خصم 50% على جميع المنتجات الرقمية!</span>
-        <div className="flex gap-3 font-mono">
-          <TimeUnit value={timeLeft.days} label={arabicLabels.days} />
-          <TimeUnit value={timeLeft.hours} label={arabicLabels.hours} />
-          <TimeUnit value={timeLeft.minutes} label={arabicLabels.minutes} />
-          <TimeUnit value={timeLeft.seconds} label={arabicLabels.seconds} />
+    <div className="bg-gradient-to-r from-pink-400 via-purple-500 to-indigo-600">
+      <div className=" text-white px-6 py-3 rounded-md shadow-lg flex justify-between items-center max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-center md:text-right font-semibold text-lg">
+          <span>🔥 خصم 50% على جميع المنتجات الرقمية!</span>
+          <div className="flex gap-3 font-mono">
+            <TimeUnit value={timeLeft.days} label={arabicLabels.days} />
+            <TimeUnit value={timeLeft.hours} label={arabicLabels.hours} />
+            <TimeUnit value={timeLeft.minutes} label={arabicLabels.minutes} />
+            <TimeUnit value={timeLeft.seconds} label={arabicLabels.seconds} />
+          </div>
         </div>
-      </div>
 
-      <button
-        onClick={() => setIsVisible(false)}
-        aria-label="إغلاق"
-        className="text-white hover:text-gray-300 transition"
-      >
-        <FiX size={24} />
-      </button>
+        <button
+          onClick={() => setIsVisible(false)}
+          aria-label="إغلاق"
+          className="text-white hover:text-gray-300 transition"
+        >
+          <FiX size={24} />
+        </button>
+      </div>
     </div>
   );
 }

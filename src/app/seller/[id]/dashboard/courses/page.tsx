@@ -7,6 +7,9 @@ import Link from "next/link";
 import { toast } from "sonner";
 import CoursesPage from "../../../../my-courses/page";
 import { div } from "framer-motion/client";
+import Input from "@/components/ui/Input";
+import Button from "../../../../../components/ui/Button";
+import { usePathname } from "next/navigation";
 
 interface Course {
   id: string;
@@ -210,6 +213,7 @@ export default function CoursesPage() {
     }
   };
 
+  const pathname = usePathname();
   return (
     <motion.div
       initial="hidden"
@@ -233,11 +237,16 @@ export default function CoursesPage() {
       </div>
 
       {/* Course Management Header */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold">قائمة الدورات التدريبية</h2>
-        <p className="text-gray-500">
-          إدارة وتنظيم الدورات التدريبية الخاصة بك
-        </p>
+      <div className="flex justify-between gap-2 mb-8">
+        <div>
+          <h2 className="text-xl font-semibold">قائمة الدورات التدريبية</h2>
+          <p className="text-gray-500">
+            إدارة وتنظيم الدورات التدريبية الخاصة بك
+          </p>
+        </div>
+        <Link href={pathname + "/add"}>
+          <Button> </Button>
+        </Link>
       </div>
 
       {/* Filters */}
@@ -252,7 +261,7 @@ export default function CoursesPage() {
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={20}
               />
-              <input
+              <Input
                 type="text"
                 placeholder="البحث عن دورة..."
                 value={searchQuery}

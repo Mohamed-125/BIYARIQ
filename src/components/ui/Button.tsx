@@ -16,6 +16,7 @@ const variants = cva(
     variants: {
       variant: {
         primary: "bg-purple-600 hover:bg-purple-700",
+        outline: "border border-purple-600 text-purple-600",
         secondary: "bg-[rgba(9,9,49)] hover:bg-[rgba(9,9,49,0.85)] ",
         destructive: "bg-red-500 hover:bg-red-400",
         link: [],
@@ -55,7 +56,11 @@ const Button = ({
       {...props}
     >
       {loading && <Loading />}
-      <span className={`${loading ? "opacity-0" : "opacity-100"}`}>
+      <span
+        className={`flex justify-center gap-2.5 items-center ${
+          loading ? "opacity-0" : "opacity-100"
+        }`}
+      >
         {children}
       </span>
     </button>
