@@ -1,9 +1,16 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Package, Truck, Home, CheckCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { FiPackage, FiDownload, FiBook } from "react-icons/fi";
 import Button from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/Dialog";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -57,29 +64,47 @@ const OrdersPage = () => {
       ? dummyProducts
       : dummyProducts.filter((product) => product.type === activeTab);
 
-  const getStatusBadge = (type: string) => {
-    switch (type) {
-      case "physical":
-        return (
-          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-            تم التوصيل
-          </span>
-        );
-      case "digital":
-        return (
-          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-            جاهز للتحميل
-          </span>
-        );
-      case "course":
-        return (
-          <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-            مفتوح
-          </span>
-        );
-      default:
-        return null;
-    }
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const orderStatuses = {
+    physical: [
+      { status: "pending", label: "قيد المعالجة", color: "yellow" },
+      { status: "processing", label: "جاري التجهيز", color: "blue" },
+      { status: "shipped", label: "تم الشحن", color: "indigo" },
+      { status: "out_for_delivery", label: "خارج للتوصيل", color: "purple" },
+      { status: "delivered", label: "تم التوصيل", color: "green" },
+      { status: "cancelled", label: "ملغي", color: "red" },
+      { status: "returned", label: "مرتجع", color: "gray" },
+    ],
+    digital: [
+      { status: "pending", label: "قيد المعالجة", color: "yellow" },
+      { status: "processing", label: "جاري التجهيز", color: "blue" },
+      { status: "available", label: "متاح للتحميل", color: "green" },
+      { status: "cancelled", label: "ملغي", color: "red" },
+    ],
+    course: [
+      { status: "pending", label: "قيد المعالجة", color: "yellow" },
+      { status: "enrolled", label: "تم التسجيل", color: "green" },
+      { status: "in_progress", label: "جاري التعلم", color: "blue" },
+      { status: "completed", label: "مكتمل", color: "purple" },
+      { status: "cancelled", label: "ملغي", color: "red" },
+    ],
+  };
+
+  const getStatusBadge = (type: string, status: string) => {
+    const statusObj = orderStatuses[type as keyof typeof orderStatuses]?.find(
+      (s) => s.status === status
+    );
+    if (!statusObj) return null;
+
+    return (
+      <span
+        className={`bg-${statusObj.color}-100 text-${statusObj.color}-800 px-3 py-1 rounded-full text-sm font-medium`}
+      >
+        {statusObj.label}
+      </span>
+    );
   };
 
   const getIcon = (type: string) => {
@@ -152,6 +177,7 @@ const OrdersPage = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
+
                 <div className="flex-grow">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -159,7 +185,10 @@ const OrdersPage = () => {
                         {product.name}
                       </h3>
                       <div className="flex items-center gap-4">
-                        {getStatusBadge(product.type)}
+                        {getStatusBadge(
+                          product.type,
+                          product.status || "pending"
+                        )}
                         <span className="text-gray-600">
                           رقم الطلب: #{product.id}
                         </span>
@@ -167,7 +196,7 @@ const OrdersPage = () => {
 
                       {/* Display variants, color, and size */}
                       <div className="mt-2 flex flex-wrap gap-1.5 text-sm text-gray-600">
-                        {product.variants && product.variants.length > 0 && (
+                        {product.variants?.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-1">
                             {product.variants.map((variant, idx) => (
                               <span
@@ -206,6 +235,7 @@ const OrdersPage = () => {
                       {formatPrice(product.price)}
                     </p>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-gray-600">
                       {getIcon(product.type)}
@@ -216,11 +246,18 @@ const OrdersPage = () => {
                         {product.type === "course" && "يمكنك الوصول للمحتوى"}
                       </span>
                     </div>
+
                     <Button
                       variant={
                         product.type === "physical" ? "secondary" : "primary"
                       }
                       className="px-6"
+                      onClick={() => {
+                        if (product.type === "physical") {
+                          setSelectedOrder(product);
+                          setShowTrackingModal(true);
+                        }
+                      }}
                     >
                       {product.type === "physical"
                         ? "تتبع الشحنة"
@@ -229,10 +266,124 @@ const OrdersPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Tracking note */}
+              {product.type === "physical" && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                  className="mt-6 text-center text-sm text-gray-500"
+                >
+                  * يتم تحديث حالة الشحنة تلقائياً كل 30 دقيقة
+                </motion.div>
+              )}
             </div>
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Tracking Modal */}
+      <Dialog open={showTrackingModal} setOpen={setShowTrackingModal}>
+        <DialogContent className="relative max-w-lg w-full mx-4 shadow-xl bg-white rounded-lg">
+          <button
+            onClick={() => setShowTrackingModal(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          >
+            <X size={20} />
+          </button>
+
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-bold">
+              تتبع الشحنة
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-8 relative before:absolute before:content-[''] before:w-0.5 before:h-full before:bg-gray-200 before:left-5 before:top-0 rtl:before:right-5 rtl:before:left-auto">
+            {/* Step 1 */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center relative z-10 bg-white"
+            >
+              <div className="absolute w-3 h-3 bg-blue-600 rounded-full left-4 rtl:right-4 rtl:left-auto"></div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <Package className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-medium">تم استلام الطلب</h3>
+                <p className="text-gray-500">12 مايو 2024، 10:30 صباحاً</p>
+              </div>
+            </motion.div>
+
+            {/* Step 2 */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-center relative z-10 bg-white"
+            >
+              <div className="absolute w-3 h-3 bg-indigo-600 rounded-full left-4 rtl:right-4 rtl:left-auto"></div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                <Truck className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-medium">تم شحن الطلب</h3>
+                <p className="text-gray-500">13 مايو 2024، 2:15 مساءً</p>
+              </div>
+            </motion.div>
+
+            {/* Step 3 */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center relative z-10 bg-white"
+            >
+              <div className="absolute w-3 h-3 bg-purple-600 rounded-full left-4 rtl:right-4 rtl:left-auto"></div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                <Home className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-medium">خارج للتوصيل</h3>
+                <p className="text-gray-500">14 مايو 2024، 9:00 صباحاً</p>
+              </div>
+            </motion.div>
+
+            {/* Step 4 */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+              className="flex items-center relative z-10 bg-white"
+            >
+              <div className="absolute w-3 h-3 bg-green-600 rounded-full left-4 rtl:right-4 rtl:left-auto"></div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-medium">تم التوصيل</h3>
+                <p className="text-gray-500">14 مايو 2024، 2:30 مساءً</p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Tracking info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm"
+          >
+            <h4 className="font-medium mb-2">معلومات إضافية</h4>
+            <p className="text-gray-600">رقم التتبع: {selectedOrder?.id}</p>
+            <p className="text-gray-600">شركة الشحن: أرامكس</p>
+            <p className="text-gray-600">المندوب: أحمد محمد</p>
+            <p className="text-gray-600">رقم الهاتف: 0123456789</p>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

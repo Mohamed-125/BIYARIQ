@@ -16,6 +16,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Input from "../components/ui/Input";
+import { div } from "framer-motion/client";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -41,7 +42,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative sm:h-[500px] md:h-[700px] bg-[var(--section-bg)] overflow-hidden py-12 sm:py-8">
+      <section className="relative sm:h-[500px] md:h-[700px] bg-[var(--section)] overflow-hidden py-12 sm:py-8">
         <motion.div
           className="container mx-auto  h-full flex items-center"
           initial="initial"
@@ -69,7 +70,7 @@ export default function Home() {
                 </motion.div>
               </div>
               <motion.div
-                className="relative flex gap-2 sm:gap-1.5 w-full sm:max-w-md"
+                className="relative flex gap-2 sm:gap-1.5 w-full sm:max-w-md items-center"
                 variants={fadeInUp}
               >
                 <Input
@@ -100,7 +101,7 @@ export default function Home() {
       <Categories />
 
       {/* Physical Products Section */}
-      <section className="py-16 bg-[var(--section-bg)]">
+      <section className="py-16 bg-[var(--section)]">
         <motion.div
           className="container mx-auto px-4"
           initial="initial"
@@ -222,7 +223,7 @@ export default function Home() {
       </section>
 
       {/* Courses Section */}
-      <section className="py-16 bg-[var(--section-bg)]">
+      <section className="py-16 bg-[var(--section)]">
         <motion.div
           className="container mx-auto px-4"
           initial="initial"

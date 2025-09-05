@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   TrendingUp,
   Users,
@@ -11,7 +12,11 @@ import {
   TrendingDown,
   ArrowUpRight,
   ArrowDownRight,
+  Wallet,
+  LifeBuoy,
+  Headphones,
 } from "lucide-react";
+import { CiMoneyBill } from "react-icons/ci";
 import Rating from "@/components/ui/Rating";
 import {
   AreaChart,
@@ -139,6 +144,25 @@ const topProducts = [
   },
 ];
 
+const FastLinkCard = ({ icon: Icon, title, description, href }: { icon: any, title: string, description: string, href: string }) => (
+  <motion.a
+    href={href}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className="block p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 hover:border-purple-200"
+  >
+    <div className="flex items-start gap-4">
+      <div className="p-3 bg-purple-50 rounded-lg text-purple-600">
+        <Icon size={24} />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+        <p className="text-gray-600">{description}</p>
+      </div>
+    </div>
+  </motion.a>
+);
+
 export default function AnalyticsPage() {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("ar-SA", {
@@ -153,7 +177,84 @@ export default function AnalyticsPage() {
       variants={containerVariants}
       className="max-w-7xl mx-auto p-6 space-y-8"
     >
-      <h1 className="text-2xl font-bold">التحليلات</h1>
+      {/* Fast Links */}
+      <motion.section
+        variants={itemVariants}
+        className="mb-12"
+      >
+        <h2 className="text-xl font-semibold mb-6">روابط سريعة</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <FastLinkCard
+            icon={Package}
+            title="المنتجات"
+            description="إدارة المنتجات المادية والرقمية"
+            href="/seller/[id]/dashboard/products"
+          />
+          <FastLinkCard
+            icon={Star}
+            title="التقييمات"
+            description="مراجعة تقييمات العملاء"
+            href="/seller/[id]/dashboard/reviews"
+          />
+          <FastLinkCard
+            icon={Wallet}
+            title="رصيدي"
+            description="إدارة الرصيد والمعاملات المالية"
+            href="/seller/[id]/dashboard/balance"
+          />
+          <FastLinkCard
+            icon={LifeBuoy}
+            title="الدعم"
+            description="مركز المساعدة والدعم الفني"
+            href="/seller/[id]/dashboard/support"
+          />
+        </div>
+      </motion.section>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <h1 className="text-2xl font-bold">التحليلات</h1>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/seller/test-seller/dashboard/products">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+            >
+              <Package className="w-5 h-5 text-purple-500" />
+              <span>المنتجات</span>
+            </motion.div>
+          </Link>
+          <Link href="/seller/test-seller/dashboard/reviews">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+            >
+              <Star className="w-5 h-5 text-yellow-500" />
+              <span>التقييمات</span>
+            </motion.div>
+          </Link>
+          <Link href="/seller/test-seller/dashboard/balance">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+            >
+              <CiMoneyBill className="w-5 h-5 text-green-500" />
+              <span>رصيدي</span>
+            </motion.div>
+          </Link>
+          <Link href="/seller/test-seller/dashboard/support">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+            >
+              <Headphones className="w-5 h-5 text-blue-500" />
+              <span>الدعم</span>
+            </motion.div>
+          </Link>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <motion.div

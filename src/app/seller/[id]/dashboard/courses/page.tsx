@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Edit2, Trash2, Eye, Users, Clock } from "lucide-react";
+import { Search, Edit2, Trash2, Eye, Users, Clock, Plus } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import CoursesPage from "../../../../my-courses/page";
@@ -245,7 +245,10 @@ export default function CoursesPage() {
           </p>
         </div>
         <Link href={pathname + "/add"}>
-          <Button> </Button>
+          <Button>
+            أضف دوره
+            <Plus />{" "}
+          </Button>
         </Link>
       </div>
 

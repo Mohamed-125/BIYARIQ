@@ -52,7 +52,7 @@ button {
 
 .section {
   padding-block: 5.2rem;
-  background-color: var(--section-bg);
+  background-color: var(--section);
 }
 
 /* .info-page .container {
