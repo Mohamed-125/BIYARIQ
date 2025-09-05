@@ -3,27 +3,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-
-type User = {
-  id: string;
-  name: string;
-  role: "عميل" | "دعم بيارق";
-};
-
-type Message = {
-  id: string;
-  sender: string;
-  text: string;
-  timestamp: string;
-};
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+type User = { id: string; name: string; role: "عميل" | "دعم بيارق" };
+type Message = { id: string; sender: string; text: string; timestamp: string };
 const Users: User[] = [
   { id: "admin", name: "دعم بيارق", role: "دعم بيارق" },
   { id: "1", name: "أحمد علي", role: "عميل" },
   { id: "2", name: "محمد يوسف", role: "عميل" },
-];
-
-// رسائل تجريبية
+]; // رسائل تجريبية
 const DummyMessages: Record<string, Message[]> = {
   admin: [
     {
@@ -63,17 +50,14 @@ const DummyMessages: Record<string, Message[]> = {
     },
   ],
 };
-
 export default function SupportPage() {
-  const [selectedUser, setSelectedUser] = useState<User>(Users[0]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(Users[0]);
   const [messages, setMessages] = useState<Message[]>(
     DummyMessages[Users[0].id] || []
   );
   const [input, setInput] = useState("");
-
   const sendMessage = () => {
     if (!input.trim() || !selectedUser) return;
-
     const newMessage: Message = {
       id: Date.now().toString(),
       sender: "أنا",
@@ -83,71 +67,119 @@ export default function SupportPage() {
         minute: "2-digit",
       }),
     };
-
     setMessages([...messages, newMessage]);
     setInput("");
   };
-
   const handleSelectUser = (user: User) => {
     setSelectedUser(user);
     setMessages(DummyMessages[user.id] || []);
   };
-
+  const adminUsers = Users.filter((u) => u.role === "دعم بيارق");
+  const clientUsers = Users.filter((u) => u.role === "عميل");
   return (
     <div className="flex h-[90vh] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-300">
-      {/* Sidebar */}
+      {" "}
+      {/* Sidebar */}{" "}
       <div className="w-72 bg-gray-100 border-r border-gray-300 flex flex-col">
+        {" "}
         <h2 className="text-xl font-bold p-4 border-b border-gray-300">
-          الدعم الفني
-        </h2>
-        <div className="flex-1 overflow-y-auto">
-          {Users.map((user) => (
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              key={user.id}
-              className={`p-4 cursor-pointer flex items-center gap-3 transition ${
-                selectedUser?.id === user.id
-                  ? "bg-[var(--primary)] text-white"
-                  : "hover:bg-gray-200"
-              } ${
-                user.id === "admin" ? "font-bold border-b border-gray-300" : ""
-              }`}
-              onClick={() => handleSelectUser(user)}
+          {" "}
+          الدعم الفني{" "}
+        </h2>{" "}
+        <Tabs defaultValue="admin" className="flex-1 flex flex-col">
+          {" "}
+          <TabsList className="grid grid-cols-2 gap-2 m-2">
+            {" "}
+            <TabsTrigger
+              value="admin"
+              className="border border-gray-100 rounded-sm  "
             >
-              {/* صورة رمزية بسيطة */}
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
-                  user.id === "admin"
-                    ? "bg-[var(--secondray)] text-white"
-                    : "bg-gray-300 text-gray-800"
-                }`}
+              الإدارة
+            </TabsTrigger>{" "}
+            <TabsTrigger
+              className="border border-gray-100 rounded-sm  "
+              value="clients"
+            >
+              العملاء
+            </TabsTrigger>{" "}
+          </TabsList>{" "}
+          {/* Tab الإدارة */}{" "}
+          <TabsContent value="admin" className="flex-1 overflow-y-auto">
+            {" "}
+            {adminUsers.map((user) => (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                key={user.id}
+                className={`p-4 cursor-pointer flex items-center gap-3 transition ${
+                  selectedUser?.id === user.id
+                    ? "bg-[var(--primary)] text-white"
+                    : "hover:bg-gray-200"
+                } font-bold border-b border-gray-300`}
+                onClick={() => handleSelectUser(user)}
               >
-                {user.name.charAt(0)}
-              </div>
-              <div>
-                <p>{user.name}</p>
-                <span className="text-xs opacity-70">{user.role}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat Area */}
+                {" "}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-[var(--secondray)] text-white">
+                  {" "}
+                  {user.name.charAt(0)}{" "}
+                </div>{" "}
+                <div>
+                  {" "}
+                  <p>{user.name}</p>{" "}
+                  <span className="text-xs opacity-70">{user.role}</span>{" "}
+                </div>{" "}
+              </motion.div>
+            ))}{" "}
+          </TabsContent>{" "}
+          {/* Tab العملاء */}{" "}
+          <TabsContent value="clients" className="flex-1 overflow-y-auto">
+            {" "}
+            {clientUsers.map((user) => (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                key={user.id}
+                className={`p-4 cursor-pointer flex items-center gap-3 transition ${
+                  selectedUser?.id === user.id
+                    ? "bg-[var(--primary)] text-white"
+                    : "hover:bg-gray-200"
+                }`}
+                onClick={() => handleSelectUser(user)}
+              >
+                {" "}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold bg-gray-300 text-gray-800">
+                  {" "}
+                  {user.name.charAt(0)}{" "}
+                </div>{" "}
+                <div>
+                  {" "}
+                  <p>{user.name}</p>{" "}
+                  <span className="text-xs opacity-70">{user.role}</span>{" "}
+                </div>{" "}
+              </motion.div>
+            ))}{" "}
+          </TabsContent>{" "}
+        </Tabs>{" "}
+      </div>{" "}
+      {/* Chat Area */}{" "}
       <div className="flex-1 flex flex-col">
+        {" "}
         {selectedUser ? (
           <>
-            {/* Header */}
+            {" "}
+            {/* Header */}{" "}
             <div className="p-4 border-b border-gray-300 bg-gray-50 flex justify-between items-center">
-              <h3 className="font-semibold text-lg">{selectedUser.name}</h3>
-              <span className="text-sm text-gray-500">{selectedUser.role}</span>
-            </div>
-
-            {/* Messages */}
+              {" "}
+              <h3 className="font-semibold text-lg">
+                {selectedUser.name}
+              </h3>{" "}
+              <span className="text-sm text-gray-500">{selectedUser.role}</span>{" "}
+            </div>{" "}
+            {/* Messages */}{" "}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-gray-50">
+              {" "}
               {messages.length === 0 ? (
                 <p className="text-center text-gray-400">
-                  لا توجد رسائل مع {selectedUser.name} بعد
+                  {" "}
+                  لا توجد رسائل مع {selectedUser.name} بعد{" "}
                 </p>
               ) : (
                 messages.map((msg) => (
@@ -161,32 +193,35 @@ export default function SupportPage() {
                         : "bg-white text-gray-800 mr-auto"
                     }`}
                   >
-                    <p>{msg.text}</p>
+                    {" "}
+                    <p>{msg.text}</p>{" "}
                     <span className="block text-xs mt-1 opacity-70 text-right">
-                      {msg.timestamp}
-                    </span>
+                      {" "}
+                      {msg.timestamp}{" "}
+                    </span>{" "}
                   </motion.div>
                 ))
-              )}
-            </div>
-
-            {/* Input */}
+              )}{" "}
+            </div>{" "}
+            {/* Input */}{" "}
             <div className="p-4 border-t border-gray-300 bg-white flex gap-2">
+              {" "}
               <Input
                 placeholder="اكتب رسالتك..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              />
-              <Button onClick={sendMessage}>إرسال</Button>
-            </div>
+              />{" "}
+              <Button onClick={sendMessage}>إرسال</Button>{" "}
+            </div>{" "}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-400">
-            اختر محادثة لبدء التواصل
+            {" "}
+            اختر محادثة لبدء التواصل{" "}
           </div>
-        )}
-      </div>
+        )}{" "}
+      </div>{" "}
     </div>
   );
 }

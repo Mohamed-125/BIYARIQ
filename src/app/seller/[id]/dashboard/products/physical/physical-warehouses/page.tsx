@@ -22,19 +22,15 @@ import {
   FileText,
   Paperclip,
 } from "lucide-react";
-import Badge from "../../../../../../components/ui/Badge";
-import Card, {
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../../../../../components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import Card, { CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../../../../components/ui/Dialog";
+} from "@/components/ui/Dialog";
 import {
   Table,
   TableHeader,
@@ -42,13 +38,13 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "../../../../../../components/ui/Table";
+} from "@/components/ui/Table";
 import Label from "@/components/ui/Label";
-import { Product } from "../../../../../../context/CartContext";
+import { Product } from "@/context/CartContext";
 import { div } from "framer-motion/client";
-import AddWarehouseDialog from "../../../../Components/AddWarehouseDialog";
+import AddWarehouseDialog from "../../../../../Components/AddWarehouseDialog";
 import { bg } from "date-fns/locale";
-import { formatDate } from "../../../../utils";
+import { formatDate } from "../../../../../utils";
 // تعريف أنواع البيانات
 interface Product {
   id: string;
@@ -335,7 +331,7 @@ export default function WarehousesPage() {
         {filteredWarehouses.map((warehouse) => (
           <motion.div key={warehouse.id} variants={itemVariants}>
             <Link
-              href={`/seller/1/dashboard/manage-physical-products/physical-warehouses/${warehouse.id}`}
+              href={`/seller/1/dashboard/products/physical/warehouses${warehouse.id}`}
             >
               <Card className="cursor-pointer  !border-gray-300 transition-colors">
                 <CardHeader className="space-y-4">

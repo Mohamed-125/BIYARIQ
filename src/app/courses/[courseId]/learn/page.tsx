@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import {
   Play,
   CheckCircle,
@@ -9,6 +9,10 @@ import {
   ChevronUp,
   MessageCircle,
   Download,
+  ArrowLeft,
+  ArrowRight,
+  Send,
+  User,
 } from "lucide-react";
 
 const containerVariants: Variants = {
@@ -33,6 +37,18 @@ const itemVariants: Variants = {
   },
 };
 
+interface Question {
+  id: string;
+  userId: string;
+  userName: string;
+  text: string;
+  createdAt: string;
+  answer?: {
+    text: string;
+    createdAt: string;
+  };
+}
+
 interface Lesson {
   id: string;
   title: string;
@@ -50,6 +66,28 @@ interface Unit {
 }
 
 // Dummy data for demonstration
+// Dummy questions data for demonstration
+const questionsData: Question[] = [
+  {
+    id: "1",
+    userId: "user1",
+    userName: "محمد أحمد",
+    text: "كيف يمكنني تطبيق مفهوم الـ Custom Hooks في React?",
+    createdAt: "2024-03-15T10:30:00",
+    answer: {
+      text: "Custom Hooks هي وظيفة تبدأ باسم use وتسمح لك بإعادة استخدام منطق الحالة بين المكونات. يمكنك إنشاء custom hook عن طريق استخراج منطق الحالة من المكون إلى وظيفة منفصلة.",
+      createdAt: "2024-03-15T11:00:00",
+    },
+  },
+  {
+    id: "2",
+    userId: "user2",
+    userName: "سارة خالد",
+    text: "ما هو الفرق بين useEffect و useLayoutEffect?",
+    createdAt: "2024-03-16T09:15:00",
+  },
+];
+
 const courseData = {
   id: "1",
   title: "تطوير تطبيقات الويب المتقدمة",
@@ -112,6 +150,64 @@ export default function CourseLearnPage() {
   );
   const [showNotes, setShowNotes] = useState(false);
   const [note, setNote] = useState("");
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>(questionsData);
+  const [newQuestion, setNewQuestion] = useState("");
+
+  const getNextLesson = () => {
+    let nextLesson: Lesson | null = null;
+    let found = false;
+
+    for (const unit of units) {
+      for (let i = 0; i < unit.lessons.length; i++) {
+        if (found && !nextLesson) {
+          nextLesson = unit.lessons[i];
+          break;
+        }
+        if (unit.lessons[i].id === currentLesson.id) {
+          found = true;
+        }
+      }
+      if (nextLesson) break;
+    }
+
+    return nextLesson;
+  };
+
+  const getPreviousLesson = () => {
+    let previousLesson: Lesson | null = null;
+    let found = false;
+
+    for (const unit of units.slice().reverse()) {
+      for (let i = unit.lessons.length - 1; i >= 0; i--) {
+        if (found && !previousLesson) {
+          previousLesson = unit.lessons[i];
+          break;
+        }
+        if (unit.lessons[i].id === currentLesson.id) {
+          found = true;
+        }
+      }
+      if (previousLesson) break;
+    }
+
+    return previousLesson;
+  };
+
+  const handleAskQuestion = () => {
+    if (!newQuestion.trim()) return;
+
+    const question: Question = {
+      id: `q${questions.length + 1}`,
+      userId: "current-user",
+      userName: "أنت",
+      text: newQuestion,
+      createdAt: new Date().toISOString(),
+    };
+
+    setQuestions([question, ...questions]);
+    setNewQuestion("");
+  };
 
   const toggleUnit = (unitId: string) => {
     setUnits(
@@ -199,6 +295,128 @@ export default function CourseLearnPage() {
                   تحميل المواد التعليمية
                 </a>
               )}
+            </motion.div>
+
+            {/* Navigation Buttons */}
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center justify-between gap-4 mb-6"
+            >
+              {getPreviousLesson() && (
+                <button
+                  onClick={() => setCurrentLesson(getPreviousLesson()!)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <ArrowRight className="rtl:hidden" />
+                  <ArrowLeft className="hidden rtl:block" />
+                  الدرس السابق
+                </button>
+              )}
+              {getNextLesson() && (
+                <button
+                  onClick={() => setCurrentLesson(getNextLesson()!)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors mr-auto"
+                >
+                  الدرس التالي
+                  <ArrowLeft className="rtl:hidden" />
+                  <ArrowRight className="hidden rtl:block" />
+                </button>
+              )}
+            </motion.div>
+
+            {/* Questions Section */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-white rounded-xl p-6 shadow-sm mb-6"
+            >
+              <button
+                onClick={() => setShowQuestions(!showQuestions)}
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={20} />
+                  <h3 className="text-xl font-bold">الأسئلة والأجوبة</h3>
+                  <span className="text-sm text-gray-500">({questions.length})</span>
+                </div>
+                {showQuestions ? (
+                  <ChevronUp size={20} />
+                ) : (
+                  <ChevronDown size={20} />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showQuestions && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-4 space-y-4"
+                  >
+                    {/* Ask Question Form */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                        placeholder="اكتب سؤالك هنا..."
+                        className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      />
+                      <button
+                        onClick={handleAskQuestion}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                      >
+                        <Send size={16} />
+                        إرسال
+                      </button>
+                    </div>
+
+                    {/* Questions List */}
+                    <div className="space-y-4">
+                      {questions.map((question) => (
+                        <motion.div
+                          key={question.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="border border-gray-200 rounded-lg p-4"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                              <User size={16} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{question.userName}</span>
+                                <span className="text-sm text-gray-500">
+                                  {new Date(question.createdAt).toLocaleDateString("ar-SA")}
+                                </span>
+                              </div>
+                              <p className="mt-2 text-gray-700">{question.text}</p>
+
+                              {question.answer && (
+                                <div className="mt-4 mr-8 p-4 bg-purple-50 rounded-lg">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-medium text-purple-700">
+                                      {courseData.instructor}
+                                    </span>
+                                    <span className="text-sm text-purple-600">
+                                      {new Date(question.answer.createdAt).toLocaleDateString(
+                                        "ar-SA"
+                                      )}
+                                    </span>
+                                  </div>
+                                  <p className="mt-2 text-gray-700">{question.answer.text}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {/* Notes Section */}

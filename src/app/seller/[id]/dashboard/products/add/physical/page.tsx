@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import { Upload, X, Plus, Trash2 } from "lucide-react";
+import { WarehouseSelector } from "@/components/warehouse/WarehouseSelector";
 import CreatableSelect from "react-select/creatable";
 import TipTapEditor from "@/components/TipTapEditor";
 import { toast } from "sonner";
@@ -99,8 +100,6 @@ interface PhysicalProductFormData {
   // Variants
   variants: Variant[];
   colorVariants: ColorVariant[];
-  // Shipping
-  shippingLabels: ShippingLabel[];
   // Coupons
   coupons: Coupon[];
 }
@@ -111,6 +110,14 @@ interface Warehouse {
   name: string;
   description: string;
   location: string;
+  isPrimary?: boolean;
+  stock?: number;
+  manager: {
+    name: string;
+    phone: string;
+  };
+  totalItems: number;
+  availableItems: number;
 }
 
 export default function AddPhysicalProductPage() {
@@ -134,7 +141,7 @@ export default function AddPhysicalProductPage() {
   const [sizeVariants, setSizeVariants] = useState<SizeVariant[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [shippingLabels, setShippingLabels] = useState<ShippingLabel[]>([]);
-
+  const [searchQuery, setSearchQuery] = useState("");
   // قائمة المستودعات المتاحة
   const [warehouses, setWarehouses] = useState<Warehouse[]>([
     {
@@ -174,38 +181,72 @@ export default function AddPhysicalProductPage() {
       location: "الدمام، حي الفيصلية",
     },
   ]);
-  
-  // البحث واختيار المستودعات
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [selectedWarehouses, setSelectedWarehouses] = useState<Warehouse[]>([]);
-  
-  // تصفية المستودعات حسب البحث
-  const filteredWarehouses = warehouses.filter((warehouse) =>
-    warehouse.name.includes(searchQuery) ||
-    warehouse.description.includes(searchQuery) ||
-    warehouse.location.includes(searchQuery)
-  );
-  
-  // إضافة مستودع إلى القائمة المختارة
-  const addWarehouse = (warehouse: Warehouse) => {
-    if (!selectedWarehouses.some((w) => w.id === warehouse.id)) {
-      const newSelectedWarehouses = [...selectedWarehouses, warehouse];
-      setSelectedWarehouses(newSelectedWarehouses);
-      // تحديث قيمة warehouseIds في النموذج
-      const warehouseIds = newSelectedWarehouses.map((w) => w.id);
-      setValue("warehouseIds", warehouseIds);
+  const [availableQuantity, setAvailableQuantity] = useState(0);
+
+  // حساب إجمالي المخزون من المستودعات
+  const calculateTotalStock = (warehouses: Warehouse[]) => {
+    return warehouses.reduce(
+      (total, warehouse) => total + (warehouse.stock || 0),
+      0
+    );
+  };
+
+  // تحديث الكمية المتوفرة عند تغيير المخزون
+  useEffect(() => {
+    if (selectedWarehouses.length > 0) {
+      const totalStock = calculateTotalStock(selectedWarehouses);
+      setAvailableQuantity(totalStock);
+    }
+  }, [selectedWarehouses]);
+
+  // التعامل مع تغيير الكمية المتوفرة
+  const handleAvailableQuantityChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseInt(e.target.value) || 0;
+    if (value >= 0) {
+      setAvailableQuantity(value);
     }
   };
-  
-  // إزالة مستودع من القائمة المختارة
-  const removeSelectedWarehouse = (warehouseId: string) => {
-    const newSelectedWarehouses = selectedWarehouses.filter(
-      (w) => w.id !== warehouseId
+
+  // إضافة مستودع
+  const handleWarehouseSelect = (warehouse: Warehouse) => {
+    setSelectedWarehouses((prev) => [
+      ...prev,
+      { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
+    ]);
+  };
+
+  // إزالة مستودع
+  const handleWarehouseRemove = (warehouseId: string) => {
+    setSelectedWarehouses((prev) => {
+      const newWarehouses = prev.filter((w) => w.id !== warehouseId);
+      // إذا تم إزالة المستودع الرئيسي وهناك مستودعات أخرى،
+      // اجعل المستودع الأول هو الرئيسي
+      if (
+        prev.find((w) => w.id === warehouseId)?.isPrimary &&
+        newWarehouses.length > 0
+      ) {
+        newWarehouses[0].isPrimary = true;
+      }
+      return newWarehouses;
+    });
+  };
+
+  // تغيير المستودع الرئيسي
+  const handlePrimaryWarehouseChange = (warehouseId: string) => {
+    setSelectedWarehouses((prev) =>
+      prev.map((w) => ({ ...w, isPrimary: w.id === warehouseId }))
     );
-    setSelectedWarehouses(newSelectedWarehouses);
-    // تحديث قيمة warehouseIds في النموذج
-    const warehouseIds = newSelectedWarehouses.map((w) => w.id);
-    setValue("warehouseIds", warehouseIds);
+  };
+
+  // تحديث كمية المخزون
+  const handleStockChange = (warehouseId: string, stock: number) => {
+    setSelectedWarehouses((prev) =>
+      prev.map((w) => (w.id === warehouseId ? { ...w, stock } : w))
+    );
   };
 
   const [showAlert, setShowAlert] = useState<{
@@ -415,6 +456,9 @@ export default function AddPhysicalProductPage() {
     setShippingLabels(newShippingLabels);
   };
 
+  const filteredWarehouses = warehouses.filter((warehouse) =>
+    warehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <motion.div
       initial="hidden"
@@ -610,24 +654,6 @@ export default function AddPhysicalProductPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                الكمية المتوفرة
-              </label>
-              <Input
-                type="number"
-                {...register("stockQuantity", {
-                  min: { value: 0, message: "الكمية يجب أن تكون أكبر من 0" },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              {errors.stockQuantity && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.stockQuantity.message}
-                </p>
-              )}
-            </div>
-
-            <div>
               <label className="flex items-center gap-2">
                 <Input
                   type="checkbox"
@@ -642,115 +668,18 @@ export default function AddPhysicalProductPage() {
           </div>
         </motion.section>
 
-        {/* Warehouse Selection */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <h2 className="text-xl font-semibold mb-6">اختيار المستودعات المادية</h2>
-          <div className="grid grid-cols-1 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ابحث عن المستودعات *
-              </label>
-              <Input
-                type="text"
-                placeholder="ابحث باسم المستودع أو الوصف أو الموقع"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
-              />
-              
-              <Controller
-                name="warehouseIds"
-                control={control}
-                rules={{ required: "يجب اختيار مستودع واحد على الأقل" }}
-                render={({ field }) => (
-                  <>
-                    {/* المستودعات المتاحة */}
-                    <div className="mb-6">
-                      <h3 className="text-md font-medium mb-3">المستودعات المتاحة</h3>
-                      <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2">
-                        {filteredWarehouses.length > 0 ? (
-                          <div className="space-y-3">
-                            {filteredWarehouses.map((warehouse) => (
-                              <div
-                                key={warehouse.id}
-                                className="border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition-colors cursor-pointer"
-                                onClick={() => addWarehouse(warehouse)}
-                              >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <h4 className="font-medium text-purple-700">{warehouse.name}</h4>
-                                    <p className="text-sm text-gray-600">{warehouse.description}</p>
-                                    <p className="text-xs text-gray-500 mt-1">{warehouse.location}</p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200 transition-colors"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addWarehouse(warehouse);
-                                    }}
-                                  >
-                                    إضافة
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-4 text-gray-500">
-                            لا توجد مستودعات مطابقة لبحثك
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* المستودعات المختارة */}
-                    <div>
-                      <h3 className="text-md font-medium mb-3">المستودعات المختارة</h3>
-                      {selectedWarehouses.length > 0 ? (
-                        <div className="space-y-3">
-                          {selectedWarehouses.map((warehouse) => (
-                            <div
-                              key={warehouse.id}
-                              className="border border-gray-300 rounded-lg p-3 bg-purple-50"
-                            >
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-medium text-purple-700">{warehouse.name}</h4>
-                                  <p className="text-sm text-gray-600">{warehouse.description}</p>
-                                  <p className="text-xs text-gray-500 mt-1">{warehouse.location}</p>
-                                </div>
-                                <button
-                                  type="button"
-                                  className="text-red-500 hover:text-red-700 transition-colors"
-                                  onClick={() => removeSelectedWarehouse(warehouse.id)}
-                                >
-                                  <X size={18} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 border border-gray-300 rounded-lg text-gray-500">
-                          لم تقم باختيار أي مستودعات بعد
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              />
-              {errors.warehouseIds && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.warehouseIds.message}
-                </p>
-              )}
-            </div>
-          </div>
-        </motion.section>
+        {/* Digital Warehouses Selection */}
+        <WarehouseSelector
+          warehouses={warehouses}
+          selectedWarehouses={selectedWarehouses}
+          onWarehouseSelect={handleWarehouseSelect}
+          onWarehouseRemove={handleWarehouseRemove}
+          onPrimaryWarehouseChange={handlePrimaryWarehouseChange}
+          onStockChange={handleStockChange}
+          availableQuantity={availableQuantity}
+          handleAvailableQuantityChange={handleAvailableQuantityChange}
+          error={errors.warehouseIds?.message}
+        />
 
         {/* Dimensions & Weight */}
         <motion.section

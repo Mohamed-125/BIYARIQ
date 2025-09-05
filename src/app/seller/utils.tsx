@@ -8,6 +8,107 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  ChevronDown,
+  Menu,
+  Settings,
+  Star,
+  X,
+  BookOpen,
+  BoxesIcon,
+  HeadphoneOff,
+  Headphones,
+  PersonStanding,
+} from "lucide-react";
+import { CiMoneyBill } from "react-icons/ci";
+
+export const sidebarLinks = [
+  {
+    href: "/seller/test-seller/dashboard/analytics",
+    icon: LayoutDashboard,
+    label: "التحليلات",
+  },
+  {
+    href: "/seller/test-seller/dashboard/orders",
+    icon: ShoppingBag,
+    label: "الطلبات",
+    subItems: [
+      {
+        href: "/seller/test-seller/dashboard/orders",
+        label: "سجل الطلبات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/returned-orders",
+        label: "الطلبات المرتجعة",
+      },
+    ],
+  },
+
+  {
+    href: "/seller/test-seller/dashboard/products/physical/",
+    icon: BoxesIcon,
+    label: "اداره المنتجات الماديه",
+    subItems: [
+      {
+        href: "/seller/test-seller/dashboard/products/physical",
+        label: "المنتجات المادية",
+      },
+
+      {
+        href: "/seller/test-seller/dashboard/products/physical/warehouses",
+        label: "المخازن الماديه",
+      },
+    ],
+  },
+  {
+    href: "/seller/test-seller/dashboarddashboard/products/digital",
+    icon: BoxesIcon,
+    label: "اداره المنتجات الرقميه",
+    subItems: [
+      {
+        href: "/seller/test-seller/dashboard/products/digital",
+        label: "المنتجات الرقمية",
+      },
+      {
+        href: "/seller/test-seller/dashboard/products/digital/warhouses",
+        label: "المخازن الرقميه",
+      },
+    ],
+  },
+  {
+    href: "/seller/test-seller/dashboard/courses",
+    icon: BookOpen,
+    label: "الدورات التدريبية",
+  },
+  {
+    href: "/seller/test-seller/dashboard/reviews",
+    icon: Star,
+    label: "التقييمات",
+  },
+  {
+    href: "/seller/test-seller/dashboard/support",
+    icon: Headphones,
+    label: "الرسائل والدغم",
+  },
+  {
+    href: "/seller/test-seller/dashboard/permissions",
+    icon: PersonStanding,
+    label: "الصلاحيات",
+  },
+  {
+    href: "/seller/test-seller/dashboard/settings",
+    icon: Settings,
+    label: "الإعدادات",
+  },
+  {
+    href: "/seller/test-seller/dashboard/balance",
+    icon: CiMoneyBill,
+    label: "رصيدي",
+  },
+];
 
 // الحصول على لون حالة المعاملة
 export const getTransactionColor = (

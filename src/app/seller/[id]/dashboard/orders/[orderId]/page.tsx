@@ -19,6 +19,13 @@ import {
   Printer,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
 import jsPDF from "jspdf";
 import JsBarcode from "jsbarcode";
 import { formatDate } from "../../../../utils";
@@ -249,6 +256,23 @@ export default function OrderDetailsPage() {
   const isOrderActive =
     order.status !== "completed" && order.status !== "cancelled";
 
+  const handleStatusChange = async (newStatus: OrderStatus) => {
+    try {
+      // في التطبيق الحقيقي، هنا سيتم إرسال طلب API لتحديث حالة الطلب
+      // await fetch(`/api/orders/${params.orderId}/status`, {
+      //   method: 'PUT',
+      //   body: JSON.stringify({ status: newStatus }),
+      // });
+
+      // للعرض التجريبي، نقوم بتحديث الحالة مباشرة
+      setOrder((prev) => ({ ...prev, status: newStatus }));
+      toast.success("تم تحديث حالة الطلب بنجاح");
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      toast.error("حدث خطأ أثناء تحديث حالة الطلب");
+    }
+  };
+
   function handlePrintLabel(trackingNumber: string, company?: string) {
     // 1- أنشئ PDF جديد
     const doc = new jsPDF();
@@ -394,58 +418,64 @@ export default function OrderDetailsPage() {
               </div>
 
               {isOrderActive && (
-                <div className="flex flex-wrap gap-3 mt-4 no-print">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStatusChange("new")}
-                    className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                <div className="mt-4 no-print w-64">
+                  <Select
+                    value={order.status}
+                    onValueChange={(value: OrderStatus) =>
+                      handleStatusChange(value)
+                    }
                   >
-                    <div className="flex gap-2">
-                      <AlertCircle className="w-4 h-4" />
-                      جديد
-                    </div>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStatusChange("processing")}
-                    className="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
-                  >
-                    <div className="flex gap-2">
-                      {" "}
-                      <RefreshCw className="w-4 h-4" />
-                      قيد المعالجة
-                    </div>{" "}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStatusChange("shipped")}
-                    className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-                  >
-                    <div className="flex gap-2">
-                      <Truck className="w-4 h-4" />
-                      تم الشحن
-                    </div>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStatusChange("completed")}
-                    className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                  >
-                    <div className="flex gap-2">
-                      <CheckCircle className="w-4 h-4" />
-                      مكتمل
-                    </div>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStatusChange("cancelled")}
-                    className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-                  >
-                    <div className="flex gap-2">
-                      <XCircle className="w-4 h-4" />
-                      إلغاء
-                    </div>
-                  </Button>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر حالة الطلب" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="new"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-blue-700">
+                          <AlertCircle className="w-4 h-4" />
+                          جديد
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="processing"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-yellow-700">
+                          <RefreshCw className="w-4 h-4" />
+                          قيد المعالجة
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="shipped"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-purple-700">
+                          <Truck className="w-4 h-4" />
+                          تم الشحن
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="completed"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-green-700">
+                          <CheckCircle className="w-4 h-4" />
+                          مكتمل
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="cancelled"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-red-700">
+                          <XCircle className="w-4 h-4" />
+                          إلغاء
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </motion.div>
