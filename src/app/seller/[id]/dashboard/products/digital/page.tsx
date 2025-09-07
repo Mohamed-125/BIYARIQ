@@ -83,7 +83,13 @@ export default function DigitalProductsPage() {
               <ProductCard removeTopButtons={true} product={product} />
               <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
-                  <Edit className="w-4 h-4 text-gray-600" />
+                  <Link
+                    href={
+                      "/seller/test-seller/dashboard/products/digital/warehouses/w1/add-digital-product"
+                    }
+                  >
+                    <Edit className="w-4 h-4 text-gray-600" />
+                  </Link>{" "}
                 </button>
                 <button className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
                   <Trash className="w-4 h-4 text-red-500" />

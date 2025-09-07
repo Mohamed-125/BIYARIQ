@@ -438,6 +438,7 @@ export default function StoreSettingsPage() {
                 <Building2 className="mx-auto h-10 w-10 mb-2 opacity-50" />
                 <p>لا توجد حسابات بنكية بعد</p>
                 <Button
+                  type="button"
                   variant="ghost"
                   className="mt-3 text-purple-600"
                   onClick={() => setIsBankDialogOpen(true)}
@@ -504,14 +505,10 @@ export default function StoreSettingsPage() {
             )}
           </div>
 
-          
           {/* Dialogs */}
           <AnimatePresence>
             {isBankDialogOpen && (
-              <Dialog
-                open={isBankDialogOpen}
-                onOpenChange={setIsBankDialogOpen}
-              >
+              <Dialog open={isBankDialogOpen} setOpen={setIsBankDialogOpen}>
                 <DialogContent className="max-w-2xl w-full p-0 overflow-hidden">
                   <DialogHeader className="p-4 border-b">
                     <DialogTitle className="text-center">
@@ -616,8 +613,6 @@ export default function StoreSettingsPage() {
               </Dialog>
             )}
           </AnimatePresence>
-
-     
         </motion.section>
 
         <motion.div variants={itemVariants} className="flex justify-end gap-4">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { toast } from "sonner";
@@ -63,9 +63,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
-import AddCustomFieldDialog from "../../../../../Components/AddCustomFieldDialog";
-import AddWarehouseDialog from "../../../../../Components/AddWarehouseDialog";
-import { formatDate } from "../../../../../utils";
+import AddCustomFieldDialog from "../../../../../../Components/AddCustomFieldDialog";
+import AddWarehouseDialog from "../../../../../../Components/AddWarehouseDialog";
+import { formatDate } from "../../../../../../utils";
 
 // تعريف أنواع البيانات
 interface DigitalItem {
@@ -76,6 +76,7 @@ interface DigitalItem {
   expiryDate?: string;
   isUsed: boolean;
   createdAt: string;
+  isAvailableForSale: boolean;
   additionalInfo?: {
     username?: string;
     password?: string;
@@ -264,6 +265,7 @@ export default function DigitalWarehouseDetailsPage() {
     setWarehouse(updatedWarehouse);
     toast.success("تم حذف الحقل المخصص بنجاح");
   };
+  const pathname = usePathname();
 
   return (
     <div className="p-6 space-y-6">
@@ -284,14 +286,24 @@ export default function DigitalWarehouseDetailsPage() {
             {statusColors[warehouse.status].label}
           </Badge>
         </div>
-        <Button
-          onClick={() => setIsEditWarehouseDialogOpen(true)}
-          variant="outline"
-          className="gap-2"
-        >
-          <Edit className="w-4 h-4" />
-          تحرير المستودع
-        </Button>
+        <div classname="flex gap-2">
+          <Button
+            onClick={() => setIsEditWarehouseDialogOpen(true)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Edit className="w-4 h-4" />
+            تحرير المستودع
+          </Button>
+          <Link href={`${pathname}/add-digital-product`}>
+            <Button>
+              <div className="flex">
+                <Plus className="w-5 h-5 ml-2" />
+                إضافة منتج رقمي
+              </div>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <AddWarehouseDialog
@@ -340,6 +352,7 @@ export default function DigitalWarehouseDetailsPage() {
                     <TableHead className="text-right">النوع</TableHead>
                     <TableHead className="text-right">القيمة</TableHead>
                     <TableHead className="text-right">الحالة</TableHead>
+                    <TableHead className="text-right">متاح للبيع</TableHead>
                     <TableHead className="text-right">تاريخ الإنشاء</TableHead>
                     <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
@@ -401,6 +414,34 @@ export default function DigitalWarehouseDetailsPage() {
                         >
                           {item.isUsed ? "مستخدم" : "متاح"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={item.isAvailableForSale}
+                            onChange={(e) => {
+                              const updatedItems = warehouse.items.map((i) =>
+                                i.id === item.id
+                                  ? {
+                                      ...i,
+                                      isAvailableForSale: e.target.checked,
+                                    }
+                                  : i
+                              );
+                              setWarehouse({
+                                ...warehouse,
+                                items: updatedItems,
+                              });
+                              toast.success(
+                                `تم ${
+                                  e.target.checked ? "إتاحة" : "إيقاف"
+                                } المنتج للبيع`
+                              );
+                            }}
+                            className="h-4 w-4"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         {formatDate(item.createdAt)}

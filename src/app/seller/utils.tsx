@@ -59,22 +59,22 @@ export const sidebarLinks = [
 
       {
         href: "/seller/test-seller/dashboard/products/physical/warehouses",
-        label: "المخازن الماديه",
+        label: "المستودعات الماديه",
       },
     ],
   },
   {
     href: "/seller/test-seller/dashboarddashboard/products/digital",
     icon: BoxesIcon,
-    label: "اداره المنتجات الرقميه",
+    label: "اداره المنتجات الرقمية",
     subItems: [
       {
         href: "/seller/test-seller/dashboard/products/digital",
         label: "المنتجات الرقمية",
       },
       {
-        href: "/seller/test-seller/dashboard/products/digital/warhouses",
-        label: "المخازن الرقميه",
+        href: "/seller/test-seller/dashboard/products/digital/warehouses",
+        label: "المستودعات الرقمية",
       },
     ],
   },
@@ -91,7 +91,7 @@ export const sidebarLinks = [
   {
     href: "/seller/test-seller/dashboard/support",
     icon: Headphones,
-    label: "الرسائل والدغم",
+    label: "الرسائل والدعم",
   },
   {
     href: "/seller/test-seller/dashboard/permissions",

@@ -2,6 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import Label from "@/components/ui/Label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import { ProductVariants } from "@/app/seller/Components/ProductVariants";
+
+interface ImportedProduct {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  subcategory: string;
+  warehouse?: string;
+  [key: string]: any;
+}
 import { useForm, Controller } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import {
@@ -12,6 +46,14 @@ import {
   Package,
   Search,
   User,
+  Key,
+  Clock,
+  FileText,
+  GraduationCap,
+  Hash,
+  Settings,
+  File,
+  Trash2,
 } from "lucide-react";
 import { Editor, EditorContent } from "@tiptap/react";
 import { useEditor } from "@tiptap/react";
@@ -20,6 +62,9 @@ import CreatableSelect from "react-select/creatable";
 import TipTapEditor from "@/components/TipTapEditor";
 import { toast } from "sonner";
 import Input from "@/components/ui/Input";
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -73,16 +118,22 @@ interface Coupon {
 
 interface Variant {
   name: string;
-  options: string[];
+  type: "text" | "number" | "date" | "color";
+  value: string;
+  quantity: number;
 }
 
-type DigitalProductType = "code" | "account" | "file" | "service";
+type DigitalProductType = "software" | "license" | "file" | "account";
 
 interface DigitalProductFormData {
+  // البيانات العامة
   name: string;
   sku: string;
-  tags: string;
-  basePrice: number;
+  category: string;
+  subcategory: string;
+  wholesalePrice: number;
+  sellingPrice: number;
+  profitMargin: number;
   discountPrice: number;
   currency: string;
   stockQuantity: number;
@@ -93,34 +144,67 @@ interface DigitalProductFormData {
   shortDescription: string;
   fullDescription: string;
   productType: DigitalProductType;
-  // Digital product fields based on type
-  digitalFiles: { file: File; description: string }[];
-  codes: { code: string; isUsed: boolean }[];
+
+  // حقول البرامج
+  software?: {
+    version: string;
+    systemRequirements: string;
+    installationGuide: string;
+    files: { file: File; description: string }[];
+  };
+
+  // حقول التراخيص
+  license?: {
+    codes: {
+      code: string;
+      isUsed: boolean;
+      deviceLimit?: number;
+      userLimit?: number;
+      expiryDate?: string;
+    }[];
+    validityPeriod: string;
+    activationInstructions: string;
+  };
+
+  // حقول الملفات
+  digitalFiles: {
+    file: File;
+    description: string;
+    format: string;
+    size: number;
+    downloadLimit?: number;
+    expiryDate?: string;
+  }[];
+
+  // حقول الحسابات
   accounts: {
     username: string;
     password: string;
     platform: string;
+    loginUrl: string;
+    validityPeriod: string;
+    features: string[];
     additionalInfo: string;
   }[];
-  services: {
-    serviceDetails: string;
-    deliveryTime: string;
-    requirements: string;
-  };
-  // Common digital fields
+
+  // حقول مشتركة
   accessPassword: string;
-  allowedDownloads: number;
   expirationDate: string;
-  // Warehouses - مستودعات متعددة
-  warehouseIds: string[];
-  // Variants
+  warehouseId: string;
   variants: Variant[];
-  // Coupons
   coupons: Coupon[];
+
+  // حقول الاستيراد
+  importFile?: File;
+  importType?: "csv" | "xlsx";
+  importMapping?: {
+    [key: string]: string;
+  };
 }
 
 // واجهة المستودع الرقمي
-import { WarehouseSelector } from "@/components/warehouse/WarehouseSelector";
+import { WarehouseSelector } from "@/app/seller/Components/WarehouseSelector";
+import { Warehouse } from "../physical/page";
 
 interface DigitalWarehouse {
   isPrimary?: boolean;
@@ -146,7 +230,7 @@ export default function AddDigitalProductPage() {
     formState: { errors },
   } = useForm<DigitalProductFormData>({
     defaultValues: {
-      warehouseIds: [],
+      warehouseId: [],
       productType: "file",
       digitalFiles: [],
       codes: [],
@@ -157,11 +241,95 @@ export default function AddDigitalProductPage() {
 
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [totalQuantity, setTotalQuantity] = useState<number>(0);
+
+  // تحديث إجمالي الكمية عند تغيير كميات المتغيرات
+  useEffect(() => {
+    if (variants.length > 0) {
+      const newTotal = variants.reduce(
+        (sum, variant) => sum + variant.quantity,
+        0
+      );
+      setTotalQuantity(newTotal);
+    }
+  }, [variants]);
   const [selectedType, setSelectedType] = useState<DigitalProductType>("file");
+  const [importedProducts, setImportedProducts] = useState<ImportedProduct[]>(
+    []
+  );
+  const [showImportDialog, setShowImportDialog] = useState(false);
+
+  // إضافة مستودع (مع منع التكرار)
+  const handleWarehouseSelect = (warehouse: Warehouse) => {
+    setSelectedWarehouses((prev) => {
+      if (prev.some((w) => w.id === warehouse.id)) return prev; // لا تكرر
+      return [
+        ...prev,
+        { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
+      ];
+    });
+  };
+
+  const handleSaveImportedProducts = () => {
+    const allProductsHaveWarehouse = importedProducts.every(
+      (product) => product.warehouse
+    );
+    if (!allProductsHaveWarehouse) {
+      toast.error("يرجى اختيار مستودع لجميع المنتجات");
+      return;
+    }
+    console.log("Saving imported products:", importedProducts);
+    toast.success("تم حفظ المنتجات بنجاح");
+    setShowImportDialog(false);
+    setImportedProducts([]);
+  };
 
   const handleProductTypeChange = (type: DigitalProductType) => {
     setSelectedType(type);
     setValue("productType", type);
+  };
+
+  const handleImportFile = async (file: File) => {
+    setValue("importFile", file);
+    setValue("importType", file.name.endsWith(".xlsx") ? "xlsx" : "csv");
+
+    // قراءة الملف وعرض البيانات
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        let data;
+        if (file.name.endsWith(".xlsx")) {
+          // استخدام مكتبة xlsx لقراءة ملفات Excel
+          const XLSX = await import("xlsx");
+          const workbook = XLSX.read(e.target?.result, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        } else {
+          // استخدام مكتبة papaparse لقراءة ملفات CSV
+          const Papa = await import("papaparse");
+          const result = Papa.parse(e.target?.result as string, {
+            header: true,
+          });
+          data = result.data;
+        }
+
+        // عرض البيانات للمستخدم وإتاحة اختيار المستودع لكل منتج
+        console.log("Imported data:", data);
+        toast.success(`تم استيراد ${data.length} منتج بنجاح`);
+
+        // تحديث واجهة المستخدم لعرض المنتجات المستوردة
+        // TODO: إضافة جدول لعرض المنتجات وإتاحة اختيار المستودع لكل منتج
+      } catch (error) {
+        console.error("Error importing file:", error);
+        toast.error("حدث خطأ أثناء استيراد الملف");
+      }
+    };
+
+    if (file.name.endsWith(".xlsx")) {
+      reader.readAsBinaryString(file);
+    } else {
+      reader.readAsText(file);
+    }
   };
 
   const handleFileUpload = (files: FileList | null) => {
@@ -222,43 +390,43 @@ export default function AddDigitalProductPage() {
   };
   // قائمة المستودعات الرقمية المتاحة
   const [availableQuantity, setAvailableQuantity] = useState(0);
-  const [digitalWarehouses, setDigitalWarehouses] = useState<
-    DigitalWarehouse[]
-  >([
-    {
-      id: "dw-1",
-      name: "مستودع أكواد التفعيل",
-      description: "مستودع خاص بأكواد تفعيل البرامج والتطبيقات",
-      manager: {
-        name: "محمد أحمد",
-        phone: "+966512345678",
-      },
-      totalItems: 250,
-      availableItems: 180,
-    },
-    {
-      id: "dw-2",
-      name: "مستودع الحسابات",
-      description: "مستودع خاص بحسابات المواقع والخدمات",
-      manager: {
-        name: "سارة خالد",
-        phone: "+966523456789",
-      },
-      totalItems: 120,
-      availableItems: 75,
-    },
-    {
-      id: "dw-3",
-      name: "مستودع الملفات الرقمية",
-      description: "مستودع خاص بالكتب الإلكترونية والملفات القابلة للتحميل",
-      manager: {
-        name: "فهد عبدالله",
-        phone: "+966534567890",
-      },
-      totalItems: 350,
-      availableItems: 320,
-    },
-  ]);
+  // const [digitalWarehouses, setDigitalWarehouses] = useState<
+  //   DigitalWarehouse[]
+  // >([
+  //   {
+  //     id: "dw-1",
+  //     name: "مستودع أكواد التفعيل",
+  //     description: "مستودع خاص بأكواد تفعيل البرامج والتطبيقات",
+  //     manager: {
+  //       name: "محمد أحمد",
+  //       phone: "+966512345678",
+  //     },
+  //     totalItems: 250,
+  //     availableItems: 180,
+  //   },
+  //   {
+  //     id: "dw-2",
+  //     name: "مستودع الحسابات",
+  //     description: "مستودع خاص بحسابات المواقع والخدمات",
+  //     manager: {
+  //       name: "سارة خالد",
+  //       phone: "+966523456789",
+  //     },
+  //     totalItems: 120,
+  //     availableItems: 75,
+  //   },
+  //   {
+  //     id: "dw-3",
+  //     name: "مستودع الملفات الرقمية",
+  //     description: "مستودع خاص بالكتب الإلكترونية والملفات القابلة للتحميل",
+  //     manager: {
+  //       name: "فهد عبدالله",
+  //       phone: "+966534567890",
+  //     },
+  //     totalItems: 350,
+  //     availableItems: 320,
+  //   },
+  // ]);
 
   const [selectedWarehouses, setSelectedWarehouses] = useState<
     DigitalWarehouse[]
@@ -280,12 +448,12 @@ export default function AddDigitalProductPage() {
     }
   }, [selectedWarehouses]);
 
-  const handleWarehouseSelect = (warehouse: DigitalWarehouse) => {
-    setSelectedWarehouses((prev) => [
-      ...prev,
-      { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
-    ]);
-  };
+  // const handleWarehouseSelect = (warehouse: DigitalWarehouse) => {
+  //   setSelectedWarehouses((prev) => [
+  //     ...prev,
+  //     { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
+  //   ]);
+  // };
 
   const handleWarehouseRemove = (warehouseId: string) => {
     setSelectedWarehouses((prev) => {
@@ -364,76 +532,34 @@ export default function AddDigitalProductPage() {
       type: "success",
     });
   };
+  const wholesalePrice = watch("wholesalePrice");
+  const sellingPrice = watch("sellingPrice");
+  const profitMargin = watch("profitMargin");
 
-  const addCoupon = () => {
-    setCoupons([
-      ...coupons,
-      {
-        code: "",
-        type: "percentage",
-        value: 0,
-        startDate: "",
-        endDate: "",
-        usageLimit: 0,
-        minPurchaseAmount: 0,
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة كوبون جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
+  // لو المستخدم غيّر نسبة الربح → احسب سعر البيع
+  useEffect(() => {
+    if (wholesalePrice > 0 && profitMargin > 0) {
+      const newSellPrice = wholesalePrice * (1 + profitMargin / 100);
+      const rounded = parseFloat(newSellPrice.toFixed(2));
 
-  const removeCoupon = (index: number) => {
-    setCoupons(coupons.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف الكوبون", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
+      if (sellingPrice !== rounded) {
+        setValue("sellingPrice", rounded, { shouldValidate: true });
+      }
+    }
+  }, [profitMargin, wholesalePrice]);
 
-  const updateCoupon = (index: number, field: keyof Coupon, value: any) => {
-    const newCoupons = [...coupons];
-    newCoupons[index] = { ...newCoupons[index], [field]: value };
-    setCoupons(newCoupons);
-  };
+  // لو المستخدم غيّر سعر البيع → احسب نسبة الربح
+  useEffect(() => {
+    if (wholesalePrice > 0 && sellingPrice > 0) {
+      const newProfitRatio =
+        ((sellingPrice - wholesalePrice) / wholesalePrice) * 100;
+      const rounded = parseFloat(newProfitRatio.toFixed(2));
 
-  const addVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        name: "",
-        options: [],
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة متغير جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const removeVariant = (index: number) => {
-    setVariants(variants.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف المتغير", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const updateVariant = (index: number, field: keyof Variant, value: any) => {
-    const newVariants = [...variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
-    setVariants(newVariants);
-  };
-
-  const addVariantOption = (variantIndex: number, option: string) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].options = [
-      ...newVariants[variantIndex].options,
-      option,
-    ];
-    setVariants(newVariants);
-  };
-
-  const removeVariantOption = (variantIndex: number, optionIndex: number) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].options = newVariants[
-      variantIndex
-    ].options.filter((_, i) => i !== optionIndex);
-    setVariants(newVariants);
-  };
+      if (profitMargin !== rounded) {
+        setValue("profitMargin", rounded, { shouldValidate: true });
+      }
+    }
+  }, [sellingPrice, wholesalePrice]);
 
   return (
     <motion.div
@@ -454,7 +580,52 @@ export default function AddDigitalProductPage() {
           {showAlert.message}
         </motion.div>
       )}
-      <h1 className="text-2xl font-bold mb-8">إضافة منتج رقمي جديد</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">إضافة منتج رقمي جديد</h1>
+        <Button
+          onClick={() => {
+            setShowImportDialog(true);
+          }}
+          variant="outline"
+          className="gap-2"
+        >
+          <Upload className="w-4 h-4" />
+          استيراد منتجات
+        </Button>
+        <Dialog open={showImportDialog} setOpen={setShowImportDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>استيراد منتجات</DialogTitle>
+            </DialogHeader>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="importFile" className="min-w-[100px]">
+                  اختر ملف:
+                </Label>
+                <Input
+                  id="importFile"
+                  type="file"
+                  accept=".csv,.xlsx"
+                  onChange={(e) =>
+                    e.target.files && handleImportFile(e.target.files[0])
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="primary"
+                onClick={handleSaveImportedProducts}
+                disabled={importedProducts.length === 0}
+              >
+                حفظ المنتجات
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Product Type Selection */}
@@ -466,6 +637,42 @@ export default function AddDigitalProductPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
               type="button"
+              onClick={() => handleProductTypeChange("software")}
+              className={`p-4 rounded-lg border ${
+                selectedType === "software"
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-200"
+              } flex flex-col items-center gap-2`}
+            >
+              <Package
+                className={
+                  selectedType === "software"
+                    ? "text-purple-500"
+                    : "text-gray-500"
+                }
+              />
+              <span>برنامج</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleProductTypeChange("license")}
+              className={`p-4 rounded-lg border ${
+                selectedType === "license"
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-200"
+              } flex flex-col items-center gap-2`}
+            >
+              <CheckCircle
+                className={
+                  selectedType === "license"
+                    ? "text-purple-500"
+                    : "text-gray-500"
+                }
+              />
+              <span>ترخيص</span>
+            </button>
+            <button
+              type="button"
               onClick={() => handleProductTypeChange("file")}
               className={`p-4 rounded-lg border ${
                 selectedType === "file"
@@ -473,28 +680,8 @@ export default function AddDigitalProductPage() {
                   : "border-gray-200"
               } flex flex-col items-center gap-2`}
             >
-              <Package
-                className={
-                  selectedType === "file" ? "text-purple-500" : "text-gray-500"
-                }
-              />
-              <span>ملف رقمي</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleProductTypeChange("code")}
-              className={`p-4 rounded-lg border ${
-                selectedType === "code"
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-200"
-              } flex flex-col items-center gap-2`}
-            >
-              <CheckCircle
-                className={
-                  selectedType === "code" ? "text-purple-500" : "text-gray-500"
-                }
-              />
-              <span>كود تفعيل</span>
+              <File />
+              <span>ملف</span>
             </button>
             <button
               type="button"
@@ -514,7 +701,6 @@ export default function AddDigitalProductPage() {
               />
               <span>حساب</span>
             </button>
-           
           </div>
         </motion.section>
         {/* Basic Information */}
@@ -542,17 +728,6 @@ export default function AddDigitalProductPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                رمز المنتج (SKU)
-              </label>
-              <Input
-                type="text"
-                {...register("sku")}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 الكلمات المفتاحية
               </label>
               <Input
@@ -564,9 +739,14 @@ export default function AddDigitalProductPage() {
             </div>
           </div>
         </motion.section>
-
+        <motion.section
+          variants={itemVariants}
+          className="bg-white rounded-xl p-6 shadow-sm"
+        >
+          <div className="text-xl font-bold">المستودع : مستودع Nike</div>
+        </motion.section>
         {/* Digital Warehouses Selection */}
-        <WarehouseSelector
+        {/* <WarehouseSelector
           warehouses={digitalWarehouses}
           selectedWarehouses={selectedWarehouses}
           onWarehouseSelect={handleWarehouseSelect}
@@ -577,111 +757,7 @@ export default function AddDigitalProductPage() {
           availableQuantity={availableQuantity}
           handleAvailableQuantityChange={handleAvailableQuantityChange}
           error={errors.warehouseIds?.message}
-        />
-
-        {/* Variants */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <h2 className="text-xl font-semibold mb-6">المتغيرات (Variants)</h2>
-          <div className="space-y-6">
-            {variants.map((variant, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      اسم المتغير
-                    </label>
-                    <Input
-                      type="text"
-                      value={variant.name}
-                      onChange={(e) =>
-                        updateVariant(index, "name", e.target.value)
-                      }
-                      placeholder="مثال: المساحة، الإصدار، اللون"
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  <button
-                    onClick={() => removeVariant(index)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الخيارات
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {variant.options.map((option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className="flex items-center bg-gray-100 rounded-lg px-3 py-1"
-                      >
-                        <span>{option}</span>
-                        <button
-                          onClick={() =>
-                            removeVariantOption(index, optionIndex)
-                          }
-                          className="ml-2 text-gray-500 hover:text-red-500"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="أضف خيار جديد"
-                    className="flex-grow px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const target = e.target as HTMLInputElement;
-                        if (target.value.trim()) {
-                          addVariantOption(index, target.value.trim());
-                          target.value = "";
-                        }
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="secondary"
-                    onClick={(e) => {
-                      const input = e.currentTarget
-                        .previousElementSibling as HTMLInputElement;
-                      if (input.value.trim()) {
-                        addVariantOption(index, input.value.trim());
-                        input.value = "";
-                      }
-                    }}
-                  >
-                    إضافة
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            <Button
-              variant="outline"
-              type="button"
-              onClick={addVariant}
-              className="w-full flex items-center justify-center gap-2"
-            >
-              <Plus size={16} />
-              إضافة متغير جديد
-            </Button>
-          </div>
-        </motion.section>
+        /> */}
 
         {/* Pricing & Stock */}
         <motion.section
@@ -692,20 +768,56 @@ export default function AddDigitalProductPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                السعر الأساسي *
+                سعر الجملة *
               </label>
               <Input
                 type="number"
-                step="0.01"
-                {...register("basePrice", {
-                  required: "السعر الأساسي مطلوب",
+                step="1"
+                {...register("wholesalePrice", {
+                  required: "سعر الجملة مطلوب",
                   min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
                 })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
-              {errors.basePrice && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.basePrice.message}
+              {errors.wholesalePrice && (
+                <p className="text-sm text-red-600">
+                  {errors.wholesalePrice.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                سعر البيع *
+              </label>
+              <Input
+                type="number"
+                step="1"
+                {...register("sellingPrice", {
+                  required: "سعر البيع مطلوب",
+                  min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
+                })}
+              />
+              {errors.sellingPrice && (
+                <p className="text-sm text-red-600">
+                  {errors.sellingPrice.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                نسبة الربح (%)
+              </label>
+              <Input
+                type="number"
+                step="1"
+                {...register("profitMargin", {
+                  min: { value: 0, message: "النسبة يجب أن تكون أكبر من 0" },
+                })}
+              />
+              {errors.profitMargin && (
+                <p className="text-sm text-red-600">
+                  {errors.profitMargin.message}
                 </p>
               )}
             </div>
@@ -716,33 +828,30 @@ export default function AddDigitalProductPage() {
               </label>
               <Input
                 type="number"
-                step="0.01"
+                step="1"
                 {...register("discountPrice", {
                   min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
                 })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {errors.discountPrice && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="text-sm text-red-600">
                   {errors.discountPrice.message}
                 </p>
               )}
             </div>
-
-            <div>
-              <label className="flex items-center gap-2">
-                <Input
-                  type="checkbox"
-                  {...register("allowBackorders")}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  السماح بالطلب المسبق
-                </span>
-              </label>
-            </div>
           </div>
         </motion.section>
+
+        {/* Variants */}
+        <ProductVariants
+          variants={variants}
+          setVariants={setVariants}
+          isDigital={true}
+          profitMargin={profitMargin}
+          sellingPrice={sellingPrice}
+          wholesalePrice={wholesalePrice}
+          totalQuantity={availableQuantity}
+        />
 
         {/* Digital Product Content */}
         <motion.section
@@ -807,45 +916,116 @@ export default function AddDigitalProductPage() {
             </div>
           )}
 
-          {selectedType === "code" && (
+          {selectedType === "software" && (
             <div className="space-y-4">
-              <Button
-                type="button"
-                onClick={handleCodeAdd}
-                variant="outline"
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                إضافة كود جديد
-              </Button>
-              <AnimatePresence mode="popLayout">
-                {watch("codes").map((code, index) => (
-                  <motion.div
-                    key={index}
-                    variants={listItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="flex items-center gap-4"
-                  >
-                    <Input
-                      placeholder="أدخل الكود"
-                      value={code.code}
-                      onChange={(e) => handleCodeChange(index, e.target.value)}
-                      className="flex-grow"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleCodeRemove(index)}
-                      className="flex-shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    إصدار البرنامج
+                  </label>
+                  <Input
+                    type="text"
+                    {...register("software.version")}
+                    placeholder="مثال: 1.0.0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    متطلبات النظام
+                  </label>
+                  <Input
+                    type="text"
+                    {...register("software.systemRequirements")}
+                    placeholder="مثال: Windows 10, 4GB RAM"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  رابط التحميل
+                </label>
+                <Input
+                  type="url"
+                  {...register("software.downloadLink")}
+                  placeholder="رابط تحميل البرنامج"
+                />
+              </div>
+            </div>
+          )}
+
+          {selectedType === "license" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    نوع الترخيص
+                  </label>
+                  <Input
+                    type="text"
+                    {...register("license.type")}
+                    placeholder="مثال: مستخدم واحد، تجاري"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    تاريخ انتهاء الصلاحية
+                  </label>
+                  <Input type="date" {...register("license.expiryDate")} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  عدد الأجهزة المسموح بها
+                </label>
+                <Input
+                  type="number"
+                  {...register("license.devicesLimit")}
+                  placeholder="عدد الأجهزة المسموح بها"
+                />
+              </div>
+            </div>
+          )}
+
+          {selectedType === "file" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    نوع الملف
+                  </label>
+                  <Input
+                    type="text"
+                    {...register("file.type")}
+                    placeholder="مثال: PDF, ZIP, ePub"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    حجم الملف
+                  </label>
+                  <Input
+                    type="text"
+                    {...register("file.size")}
+                    placeholder="مثال: 50MB"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  عدد مرات التحميل المسموح بها
+                </label>
+                <Input
+                  type="number"
+                  {...register("file.downloadLimit")}
+                  placeholder="عدد مرات التحميل المسموح بها"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  تاريخ انتهاء الصلاحية
+                </label>
+                <Input type="date" {...register("file.expiryDate")} />
+              </div>
             </div>
           )}
 
@@ -917,10 +1097,7 @@ export default function AddDigitalProductPage() {
               </AnimatePresence>
             </div>
           )}
-
-  
         </motion.section>
-
         {/* Media */}
         <motion.section
           variants={itemVariants}
@@ -1001,7 +1178,6 @@ export default function AddDigitalProductPage() {
             </div>
           </div>
         </motion.section>
-
         {/* Description & Details */}
         <motion.section
           variants={itemVariants}
@@ -1031,9 +1207,6 @@ export default function AddDigitalProductPage() {
             </div>
           </div>
         </motion.section>
-
- 
-
         <div className="flex justify-end gap-4">
           <Button type="button" variant="destructive">
             إلغاء

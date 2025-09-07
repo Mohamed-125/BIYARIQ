@@ -53,7 +53,7 @@ export default function TopSaleBanner() {
 
   return (
     <div className="bg-gradient-to-r from-pink-400 via-purple-500 to-indigo-600">
-      <div className=" text-white px-6 py-3 rounded-md shadow-lg flex justify-between items-center max-w-7xl mx-auto">
+      <div className=" text-white px-6 py-3 rounded-md  flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-center md:text-right font-semibold text-lg">
           <span>🔥 خصم 50% على جميع المنتجات الرقمية!</span>
           <div className="flex gap-3 font-mono">

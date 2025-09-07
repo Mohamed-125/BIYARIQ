@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -147,14 +147,14 @@ export default function PermissionsPage() {
   // تحويل روابط القائمة الجانبية إلى هيكل الصلاحيات
   const generatePermissionsFromSidebar = () => {
     return sidebarLinks.map((link) => ({
-      id: link.id,
-      name: link.title,
+      id: link.href,
+      name: link.label,
       isGranted: false,
       icon: link.icon,
       href: link.href,
-      subPermissions: link.subLinks?.map((subLink) => ({
-        id: `${link.id}-${subLink.id}`,
-        name: subLink.title,
+      subPermissions: link?.subLinks?.map((subLink) => ({
+        id: `${link.href}-${subLink.href}`,
+        name: subLink.label,
         isGranted: false,
         href: subLink.href,
       })),
@@ -169,6 +169,10 @@ export default function PermissionsPage() {
     permissions: generatePermissionsFromSidebar(),
   });
 
+  console.log(
+    "generatePermissionsFromSidebar()",
+    generatePermissionsFromSidebar()
+  );
   const countActivePermissions = (permissions: Permission[]) => {
     let count = 0;
     permissions.forEach((permission) => {
@@ -308,76 +312,6 @@ export default function PermissionsPage() {
     });
   };
 
-  const PermissionsList = ({
-    permissions,
-    employeeData,
-    setEmployeeData,
-  }: any) => (
-    <div className="space-y-4">
-      {permissions.map((permission: Permission) => (
-        <div key={permission.id} className="space-y-2">
-          <div className="flex items-center space-x-2 rounded-lg p-2 hover:bg-gray-50">
-            <input
-              type="checkbox"
-              id={permission.id}
-              checked={permission.isGranted}
-              onChange={(e) =>
-                handlePermissionChange(
-                  permission.id,
-                  e.checked as boolean,
-                  employeeData,
-                  setEmployeeData
-                )
-              }
-            />
-            <div className="flex items-center gap-2">
-              {permission.icon && (
-                <div className="text-gray-500">{permission.icon}</div>
-              )}
-              <label
-                htmlFor={permission.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {permission.name}
-              </label>
-            </div>
-          </div>
-          {permission.subPermissions &&
-            permission.subPermissions.length > 0 && (
-              <div className="mr-6 border-r pr-4 border-gray-200">
-                {permission.subPermissions.map((subPermission) => (
-                  <div
-                    key={subPermission.id}
-                    className="flex items-center space-x-2 mt-2 p-2 hover:bg-gray-50 rounded-lg"
-                  >
-                    <input
-                      type="checkbox"
-                      id={subPermission.id}
-                      checked={subPermission.isGranted}
-                      onChange={(e) =>
-                        handlePermissionChange(
-                          subPermission.id,
-                          e.checked as boolean,
-                          employeeData,
-                          setEmployeeData
-                        )
-                      }
-                    />
-                    <label
-                      htmlFor={subPermission.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {subPermission.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            )}
-        </div>
-      ))}
-    </div>
-  );
-
   const pathname = usePathname();
   const filteredEmployees = employees.filter((employee) => {
     const nameMatch = employee.name
@@ -459,8 +393,8 @@ export default function PermissionsPage() {
               >
                 <option value="">جميع الصلاحيات</option>
                 {sidebarLinks.map((link) => (
-                  <option key={link.id} value={link.id}>
-                    {link.title}
+                  <option key={link.href} value={link.href}>
+                    {link.label}
                   </option>
                 ))}
               </select>
@@ -531,6 +465,7 @@ export default function PermissionsPage() {
                     <div className="mt-4">
                       <h4 className="text-sm font-medium mb-2">الصلاحيات</h4>
                       <PermissionsList
+                        handlePermissionChange={handlePermissionChange}
                         permissions={newEmployee.permissions}
                         employeeData={newEmployee}
                         setEmployeeData={setNewEmployee}
@@ -648,10 +583,10 @@ export default function PermissionsPage() {
                   setFilters({ ...filters, employeeId: e.target.value })
                 }
               >
-                <option value="">جميع الموظفين</option>
-                {employees.map((employee) => (
-                  <option key={employee.id} value={employee.id}>
-                    {employee.name}
+                <option value="">جميع الصلاحيات</option>
+                {sidebarLinks.map((link) => (
+                  <option key={link.href} value={link.href}>
+                    {link.label}
                   </option>
                 ))}
               </select>
@@ -683,3 +618,72 @@ export default function PermissionsPage() {
     </motion.div>
   );
 }
+
+const PermissionsList = ({
+  permissions,
+  employeeData,
+  setEmployeeData,
+  handlePermissionChange,
+}: any) => (
+  <div className="space-y-4">
+    {permissions.map((permission: Permission) => (
+      <div key={permission.id} className="space-y-2">
+        <div className="flex items-center space-x-2 rounded-lg p-2 hover:bg-gray-50">
+          <input
+            type="checkbox"
+            id={permission.id}
+            checked={permission.isGranted}
+            onChange={(e) =>
+              handlePermissionChange(
+                permission.id,
+                e.checked as boolean,
+                employeeData,
+                setEmployeeData
+              )
+            }
+          />
+          <div className="flex items-center gap-2">
+            {/* {permission.icon && <permission.icon className="text-gray-500" />} */}
+            <label
+              htmlFor={permission.id}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {permission.name}
+            </label>
+          </div>
+        </div>
+        {permission?.subPermissions &&
+          permission?.subPermissions.length > 0 && (
+            <div className="mr-6 border-r pr-4 border-gray-200">
+              {permission.subPermissions.map((subPermission) => (
+                <div
+                  key={subPermission.id}
+                  className="flex items-center space-x-2 mt-2 p-2 hover:bg-gray-50 rounded-lg"
+                >
+                  <input
+                    type="checkbox"
+                    id={subPermission.id}
+                    checked={subPermission.isGranted}
+                    onChange={(e) =>
+                      handlePermissionChange(
+                        subPermission.id,
+                        e.checked as boolean,
+                        employeeData,
+                        setEmployeeData
+                      )
+                    }
+                  />
+                  <label
+                    htmlFor={subPermission.id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {subPermission.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+      </div>
+    ))}
+  </div>
+);

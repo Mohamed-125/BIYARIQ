@@ -112,3 +112,24 @@ export function DialogFooter({
     <div className={`mt-6 flex justify-end gap-4 ${className}`}>{children}</div>
   );
 }
+
+export function DialogTrigger({
+  children,
+  asChild = false,
+  setOpen,
+}: {
+  children: React.ReactNode;
+  asChild?: boolean;
+  setOpen: (open: boolean) => void;
+}) {
+  return (
+    <div
+      onClick={() => {
+        setOpen(true);
+      }}
+      className={!asChild ? "cursor-pointer inline-block" : ""}
+    >
+      {children}
+    </div>
+  );
+}

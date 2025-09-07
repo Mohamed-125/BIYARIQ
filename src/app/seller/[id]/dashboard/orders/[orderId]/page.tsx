@@ -419,63 +419,17 @@ export default function OrderDetailsPage() {
 
               {isOrderActive && (
                 <div className="mt-4 no-print w-64">
-                  <Select
+                  <select
                     value={order.status}
-                    onValueChange={(value: OrderStatus) =>
-                      handleStatusChange(value)
-                    }
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="اختر حالة الطلب" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value="new"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-blue-700">
-                          <AlertCircle className="w-4 h-4" />
-                          جديد
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="processing"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-yellow-700">
-                          <RefreshCw className="w-4 h-4" />
-                          قيد المعالجة
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="shipped"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-purple-700">
-                          <Truck className="w-4 h-4" />
-                          تم الشحن
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="completed"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-green-700">
-                          <CheckCircle className="w-4 h-4" />
-                          مكتمل
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="cancelled"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-red-700">
-                          <XCircle className="w-4 h-4" />
-                          إلغاء
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="new">🟦 جديد</option>
+                    <option value="processing">🟨 قيد المعالجة</option>
+                    <option value="shipped">🟪 تم الشحن</option>
+                    <option value="completed">🟩 مكتمل</option>
+                    <option value="cancelled">🟥 إلغاء</option>
+                  </select>
                 </div>
               )}
             </motion.div>

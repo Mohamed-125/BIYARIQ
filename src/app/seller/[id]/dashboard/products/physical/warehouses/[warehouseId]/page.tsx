@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { toast } from "sonner";
@@ -31,7 +31,6 @@ import {
   X,
   FileText,
   Paperclip,
-  Link2,
 } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card, {
@@ -63,24 +62,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
-import AddCustomFieldDialog from "../../../../../Components/AddCustomFieldDialog";
-import AddWarehouseDialog from "../../../../../Components/AddWarehouseDialog";
-import { formatDate } from "../../../../../utils";
+import AddCustomFieldDialog from "../../../../../../Components/AddCustomFieldDialog";
+import AddWarehouseDialog from "../../../../../../Components/AddWarehouseDialog";
 
 // تعريف أنواع البيانات
-interface DigitalItem {
+interface Product {
   id: string;
   name: string;
-  type: "code" | "account" | "url" | "file";
-  value: string;
+  image: string;
+  sku: string;
+  quantity: number;
+  batchNumber?: string;
+  serialNumber?: string;
   expiryDate?: string;
-  isUsed: boolean;
-  createdAt: string;
-  additionalInfo?: {
-    username?: string;
-    password?: string;
-    loginUrl?: string;
-  };
+  unitOfMeasure?: string;
+  minStockLevel?: number;
+  maxStockLevel?: number;
+  isAvailableForSale: boolean;
 }
 
 interface CustomField {
@@ -90,69 +88,140 @@ interface CustomField {
   type: "text" | "date" | "number" | "url" | "file";
 }
 
-interface DigitalWarehouse {
+interface Warehouse {
   id: string;
   name: string;
   description?: string;
+  location: {
+    city: string;
+    address: string;
+  };
   manager: {
     name: string;
     phone: string;
   };
   createdAt: string;
   updatedAt: string;
-  items: DigitalItem[];
-  totalItems: number;
-  availableItems: number;
-  usedItems: number;
+  products: Product[];
+  totalQuantity: number;
+  minStockLevel?: number;
+  maxStockLevel?: number;
   status: "available" | "low" | "unavailable";
   customFields: CustomField[];
 }
 
 // بيانات وهمية للمستودعات
-const dummyDigitalWarehouses: DigitalWarehouse[] = [
+const dummyWarehouses: Warehouse[] = [
   {
-    id: "dw1",
-    name: "مستودع الأكواد",
-    description: "مستودع لتخزين أكواد التفعيل والتراخيص",
+    id: "w1",
+    name: "المستودع الرئيسي",
+    description: "المستودع الرئيسي للمنتجات الإلكترونية",
+    location: {
+      city: "الرياض",
+      address: "حي العليا، شارع التخصصي",
+    },
     manager: {
       name: "أحمد محمد",
       phone: "+966501234567",
     },
     createdAt: "2023-01-15",
     updatedAt: "2023-06-20",
-    items: [
+    products: [
       {
-        id: "i1",
-        name: "كود تفعيل برنامج 1",
-        type: "code",
-        value: "XXXX-YYYY-ZZZZ",
-        isUsed: false,
-        createdAt: "2023-01-15",
+        id: "p1",
+        name: "سماعات لاسلكية",
+        image: "/images/products/headphones.jpg",
+        sku: "HDP-001",
+        quantity: 50,
+        batchNumber: "B2023-01",
+        minStockLevel: 10,
+        maxStockLevel: 100,
+        unitOfMeasure: "قطعة",
+        isAvailableForSale: true,
       },
       {
-        id: "i2",
-        name: "حساب خدمة س",
-        type: "account",
-        value: "premium_account_1",
-        isUsed: true,
-        createdAt: "2023-01-20",
-        additionalInfo: {
-          username: "user123",
-          password: "********",
-          loginUrl: "https://example.com/login",
-        },
+        id: "p2",
+        name: "شاحن سريع",
+        image: "/images/products/charger.jpg",
+        sku: "CHG-002",
+        quantity: 8,
+        batchNumber: "B2023-02",
+        minStockLevel: 15,
+        maxStockLevel: 80,
+        unitOfMeasure: "قطعة",
       },
     ],
-    totalItems: 10,
-    availableItems: 8,
-    usedItems: 2,
+    totalQuantity: 58,
+    minStockLevel: 20,
+    maxStockLevel: 200,
     status: "available",
     customFields: [
       {
         id: "cf1",
-        name: "نوع المنتج",
-        value: "برمجيات",
+        name: "رقم الترخيص",
+        value: "LIC-2023-456",
         type: "text",
+      },
+    ],
+  },
+  {
+    id: "w2",
+    name: "مستودع الملابس",
+    description: "مستودع خاص بالملابس والأزياء",
+    location: {
+      city: "جدة",
+      address: "حي الروضة، شارع فلسطين",
+    },
+    manager: {
+      name: "سارة عبدالله",
+      phone: "+966512345678",
+    },
+    createdAt: "2023-03-10",
+    updatedAt: "2023-07-05",
+    products: [
+      {
+        id: "p3",
+        name: "قميص قطني",
+        image: "/images/products/shirt.jpg",
+        sku: "SHT-001",
+        quantity: 5,
+        batchNumber: "B2023-03",
+        minStockLevel: 20,
+        maxStockLevel: 150,
+        unitOfMeasure: "قطعة",
+      },
+    ],
+    totalQuantity: 5,
+    minStockLevel: 30,
+    maxStockLevel: 300,
+    status: "low",
+    customFields: [],
+  },
+  {
+    id: "w3",
+    name: "مستودع الأجهزة المنزلية",
+    description: "مستودع للأجهزة المنزلية والكهربائية",
+    location: {
+      city: "الدمام",
+      address: "حي النزهة، طريق الملك فهد",
+    },
+    manager: {
+      name: "خالد العمري",
+      phone: "+966523456789",
+    },
+    createdAt: "2023-05-20",
+    updatedAt: "2023-08-15",
+    products: [],
+    totalQuantity: 0,
+    minStockLevel: 10,
+    maxStockLevel: 100,
+    status: "unavailable",
+    customFields: [
+      {
+        id: "cf2",
+        name: "شهادة السلامة",
+        value: "https://example.com/safety-cert",
+        type: "url",
       },
     ],
   },
@@ -202,33 +271,34 @@ const statusColors = {
   },
 };
 
-export default function DigitalWarehouseDetailsPage() {
+export default function WarehouseDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const warehouseId = params.warehouseId as string;
 
   // حالة البحث والفلترة
   const [searchTerm, setSearchTerm] = useState("");
-  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
+  const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isEditWarehouseDialogOpen, setIsEditWarehouseDialogOpen] =
     useState(false);
   const [isAddCustomFieldDialogOpen, setIsAddCustomFieldDialogOpen] =
     useState(false);
   const [isEditCustomFieldDialogOpen, setIsEditCustomFieldDialogOpen] =
     useState(false);
-  const [activeTab, setActiveTab] = useState("items");
+  const [activeTab, setActiveTab] = useState("products");
   const [editingCustomField, setEditingCustomField] =
     useState<CustomField | null>(null);
-  const [warehouse, setWarehouse] = useState<DigitalWarehouse | null>(null);
+  const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
 
   // الحصول على بيانات المستودع
   useEffect(() => {
-    const foundWarehouse = dummyDigitalWarehouses.find(
-      (w) => w.id === warehouseId
-    );
+    const foundWarehouse = dummyWarehouses.find((w) => w.id === warehouseId);
     if (foundWarehouse) {
       setWarehouse(foundWarehouse);
     } else {
+      router.push(
+        "/seller/1/dashboard/manage-physical-products/physical-warehouses"
+      );
     }
   }, [warehouseId, router]);
 
@@ -242,12 +312,21 @@ export default function DigitalWarehouseDetailsPage() {
     );
   }
 
-  // فلترة العناصر بناءً على البحث
-  const filteredItems = warehouse.items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.value.toLowerCase().includes(searchTerm.toLowerCase())
+  // فلترة المنتجات بناءً على البحث
+  const filteredProducts = warehouse.products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // تنسيق التاريخ
+  const formatDate = (date: string) => {
+    return new Intl.DateTimeFormat("ar-SA", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date(date));
+  };
 
   // حذف حقل مخصص
   const handleDeleteCustomField = (id: string) => {
@@ -265,12 +344,13 @@ export default function DigitalWarehouseDetailsPage() {
     toast.success("تم حذف الحقل المخصص بنجاح");
   };
 
+  const pathname = usePathname();
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/seller/1/dashboard/manage-digital-products/digital-warehouses"
+            href="/seller/1/dashboard/manage-physical-products/physical-warehouses"
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -284,26 +364,34 @@ export default function DigitalWarehouseDetailsPage() {
             {statusColors[warehouse.status].label}
           </Badge>
         </div>
-        <Button
-          onClick={() => setIsEditWarehouseDialogOpen(true)}
-          variant="outline"
-          className="gap-2"
-        >
-          <Edit className="w-4 h-4" />
-          تحرير المستودع
-        </Button>
+        <div classname="flex gap-2">
+          <Button
+            onClick={() => setIsEditWarehouseDialogOpen(true)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Edit className="w-4 h-4" />
+            تحرير المستودع
+          </Button>
+          <Link href={`${pathname}/add-physical-product`}>
+            <Button>
+              <div className="flex">
+                <Plus className="w-5 h-5 ml-2" />
+                إضافة منتج مادي
+              </div>
+            </Button>
+          </Link>
+        </div>
       </div>
-
       <AddWarehouseDialog
         setOpen={setIsEditWarehouseDialogOpen}
         open={isEditWarehouseDialogOpen}
         onSubmit={() => {}}
       />
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="items" className="text-sm">
-            العناصر
+          <TabsTrigger value="products" className="text-sm">
+            المنتجات
           </TabsTrigger>
           <TabsTrigger value="details" className="text-sm">
             تفاصيل المستودع
@@ -313,12 +401,12 @@ export default function DigitalWarehouseDetailsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="items" className="space-y-6">
+        <TabsContent value="products" className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="البحث في العناصر..."
+                placeholder="البحث في المنتجات..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pr-10"
@@ -326,7 +414,7 @@ export default function DigitalWarehouseDetailsPage() {
             </div>
           </div>
 
-          {filteredItems.length > 0 ? (
+          {filteredProducts.length > 0 ? (
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -336,74 +424,68 @@ export default function DigitalWarehouseDetailsPage() {
               <Table dir="rtl">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">العنصر</TableHead>
-                    <TableHead className="text-right">النوع</TableHead>
-                    <TableHead className="text-right">القيمة</TableHead>
-                    <TableHead className="text-right">الحالة</TableHead>
-                    <TableHead className="text-right">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-right">المنتج</TableHead>
+                    <TableHead className="text-right">الرمز التعريفي</TableHead>
+                    <TableHead className="text-right">الكمية</TableHead>
+                    <TableHead className="text-right">رقم الدفعة</TableHead>
+                    <TableHead className="text-right">وحدة القياس</TableHead>
+                    <TableHead className="text-right">متاح للبيع</TableHead>
                     <TableHead className="text-right">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((item) => (
-                    <TableRow key={item.id}>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                            {item.type === "code" ? (
-                              <FileText className="w-6 h-6 text-gray-500" />
-                            ) : item.type === "account" ? (
-                              <User className="w-6 h-6 text-gray-500" />
-                            ) : item.type === "url" ? (
-                              <Link2 className="w-6 h-6 text-gray-500" />
-                            ) : (
-                              <FileText className="w-6 h-6 text-gray-500" />
-                            )}
+                          <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <span>{item.name}</span>
+                          <span>{product.name}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        {item.type === "code"
-                          ? "كود"
-                          : item.type === "account"
-                          ? "حساب"
-                          : item.type === "url"
-                          ? "رابط"
-                          : "ملف"}
+                        {product.sku}
                       </TableCell>
                       <TableCell className="text-right">
-                        {item.type === "url" ? (
-                          <a
-                            href={item.value}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            {item.value}
-                          </a>
-                        ) : item.type === "file" ? (
-                          <a
-                            href={item.value}
-                            className="text-blue-600 hover:underline flex items-center gap-1"
-                          >
-                            <FileText className="w-4 h-4" />
-                            عرض الملف
-                          </a>
-                        ) : (
-                          <span>{item.value}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={item.isUsed ? "destructive" : "success"}
-                          className="text-xs"
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            product.quantity <= (product.minStockLevel || 0)
+                              ? "bg-red-100 text-red-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
                         >
-                          {item.isUsed ? "مستخدم" : "متاح"}
-                        </Badge>
+                          {product.quantity}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        {formatDate(item.createdAt)}
+                        {product.batchNumber || "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {product.unitOfMeasure || "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            checked={product.isAvailableForSale}
+                            onChange={(e) => {
+                              const updatedProducts = warehouse.products.map((p) =>
+                                p.id === product.id
+                                  ? { ...p, isAvailableForSale: e.target.checked }
+                                  : p
+                              );
+                              toast.success(
+                                `تم ${e.target.checked ? 'إتاحة' : 'إيقاف'} المنتج للبيع`
+                              );
+                            }}
+                            className="h-4 w-4"
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-row-reverse items-center gap-2">
@@ -432,10 +514,10 @@ export default function DigitalWarehouseDetailsPage() {
             <div className="text-center py-12 bg-gray-50 rounded-lg">
               <Package className="w-12 h-12 mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-1">
-                لا توجد عناصر
+                لا توجد منتجات
               </h3>
               <p className="text-gray-500 mb-4">
-                لم يتم إضافة أي عناصر إلى هذا المستودع بعد.
+                لم يتم إضافة أي منتجات إلى هذا المستودع بعد.
               </p>
             </div>
           )}
@@ -470,16 +552,12 @@ export default function DigitalWarehouseDetailsPage() {
                   <p className="mt-1">{formatDate(warehouse.updatedAt)}</p>
                 </div>
                 <div>
-                  <Label>إجمالي العناصر</Label>
-                  <p className="mt-1">{warehouse.totalItems}</p>
+                  <Label>الحد الأدنى للمخزون</Label>
+                  <p className="mt-1">{warehouse.minStockLevel || "-"}</p>
                 </div>
                 <div>
-                  <Label>العناصر المتاحة</Label>
-                  <p className="mt-1">{warehouse.availableItems}</p>
-                </div>
-                <div>
-                  <Label>العناصر المستخدمة</Label>
-                  <p className="mt-1">{warehouse.usedItems}</p>
+                  <Label>الحد الأقصى للمخزون</Label>
+                  <p className="mt-1">{warehouse.maxStockLevel || "-"}</p>
                 </div>
               </CardContent>
             </Card>
@@ -487,11 +565,19 @@ export default function DigitalWarehouseDetailsPage() {
             <Card className="text-right">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 justify-end">
-                  <User className="w-5 h-5" />
-                  معلومات المسؤول
+                  <MapPin className="w-5 h-5" />
+                  الموقع والمسؤول
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 ">
+                <div>
+                  <Label>المدينة</Label>
+                  <p className="mt-1">{warehouse.location.city}</p>
+                </div>
+                <div>
+                  <Label>العنوان</Label>
+                  <p className="mt-1">{warehouse.location.address}</p>
+                </div>
                 <div>
                   <Label>اسم المسؤول</Label>
                   <p className="mt-1">{warehouse.manager.name}</p>
@@ -593,13 +679,20 @@ export default function DigitalWarehouseDetailsPage() {
             </motion.div>
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <FileText className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+              <Paperclip className="w-12 h-12 mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-1">
                 لا توجد حقول مخصصة
               </h3>
               <p className="text-gray-500 mb-4">
-                لم يتم إضافة أي حقول مخصصة لهذا المستودع بعد.
+                يمكنك إضافة حقول مخصصة لتخزين معلومات إضافية عن المستودع.
               </p>
+              <Button
+                onClick={() => setIsAddCustomFieldDialogOpen(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 ml-2" />
+                إضافة حقل مخصص
+              </Button>
             </div>
           )}
         </TabsContent>
@@ -607,10 +700,9 @@ export default function DigitalWarehouseDetailsPage() {
 
       <AddCustomFieldDialog
         open={isAddCustomFieldDialogOpen}
-        setOpen={setIsAddCustomFieldDialogOpen}
         setWarehouse={setWarehouse}
         warehouse={warehouse}
-        onSubmit={() => {}}
+        setOpen={setIsAddCustomFieldDialogOpen}
       />
     </div>
   );

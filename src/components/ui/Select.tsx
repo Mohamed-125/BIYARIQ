@@ -19,10 +19,13 @@ export function Select({
   className,
 }: SelectProps) {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState(value || "");
+  const [selected, setSelected] = React.useState<{
+    value: string;
+    label: string;
+  } | null>(value ? { value, label: value } : null);
 
-  const handleSelect = (val: string) => {
-    setSelected(val);
+  const handleSelect = (val: string, label: string) => {
+    setSelected({ value: val, label });
     onValueChange?.(val);
     setOpen(false);
   };
@@ -38,8 +41,9 @@ export function Select({
         <SelectContent>
           {React.Children.map(children, (child: any) =>
             React.cloneElement(child, {
-              onSelect: handleSelect,
-              selected: child.props.value === selected,
+              onSelect: (val: string) =>
+                handleSelect(val, child.props.children),
+              selected: child.props.value === selected?.value,
             })
           )}
         </SelectContent>
@@ -71,12 +75,10 @@ export function SelectValue({
   value,
 }: {
   placeholder?: string;
-  value?: string;
+  value?: { value: string; label: string } | null;
 }) {
   return (
-    <span className="truncate">
-      {value && value !== "" ? value : placeholder}
-    </span>
+    <span className="truncate">{value?.label ? value.label : placeholder}</span>
   );
 }
 

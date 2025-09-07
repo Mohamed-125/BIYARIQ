@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative sm:h-[500px] md:h-[700px] bg-[var(--section)] overflow-hidden py-12 sm:py-8">
+      <section className="relative h-[400px] md:h-[600px] bg-[var(--section)] overflow-hidden py-12 sm:py-8">
         <motion.div
           className="container mx-auto  h-full flex items-center"
           initial="initial"
@@ -54,10 +54,10 @@ export default function Home() {
               className="flex-1 text-right w-full"
               variants={fadeInUp}
             >
-              <h1 className="text-4xl text-center sm:text-right md:text-6xl font-bold mb-6 text-[#2D3436] leading-tight">
+              <h1 className="text-4xl text-center md:text-right md:text-5xl font-bold mb-6 text-[#2D3436] leading-tight">
                 متجر متكامل لجميع احتياجاتك
               </h1>
-              <div className="flex gap-4 justify-center sm:justify-start items-center mb-8">
+              <div className="flex gap-4 justify-center md:justify-start items-center mb-8">
                 <motion.div className="text-lg" variants={fadeInUp}>
                   <span className="font-bold text-2xl">+100</span>
                   <br />
@@ -70,7 +70,7 @@ export default function Home() {
                 </motion.div>
               </div>
               <motion.div
-                className="relative flex gap-2 sm:gap-1.5 w-full sm:max-w-md items-center"
+                className="relative flex gap-2 md:gap-1.5 w-full md:max-w-md items-center"
                 variants={fadeInUp}
               >
                 <Input
@@ -84,7 +84,7 @@ export default function Home() {
               </motion.div>
             </motion.div>
             <motion.div
-              className="flex-1 relative px-4 hidden sm:flex sm:px-0"
+              className="flex-1 relative px-4 hidden md:flex md:px-0"
               variants={fadeInUp}
             >
               <img

@@ -62,14 +62,6 @@ export default function PhysicalProductsPage() {
               className="pr-10 py-2 px-4 border border-gray-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
-          <Link href="/seller/test-seller/dashboard/products/add/physical">
-            <Button>
-              <div className="flex">
-                <Plus className="w-5 h-5 ml-2" />
-                إضافة منتج مادي
-              </div>
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -83,7 +75,13 @@ export default function PhysicalProductsPage() {
               <ProductCard removeTopButtons={true} product={product} />
               <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
-                  <Edit className="w-4 h-4 text-gray-600" />
+                  <Link
+                    href={
+                      "/seller/test-seller/dashboard/products/physical/warehouses/w1/add-physical-product"
+                    }
+                  >
+                    <Edit className="w-4 h-4 text-gray-600" />
+                  </Link>
                 </button>
                 <button className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
                   <Trash className="w-4 h-4 text-red-500" />

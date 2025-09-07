@@ -362,7 +362,7 @@ export default function BalancePage() {
                   value={withdrawalAmount}
                   onChange={(e) => setWithdrawalAmount(e.target.value)}
                   min="0"
-                  step="0.01"
+                  step="1"
                   placeholder="0.00"
                   className="w-full py-2 px-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />

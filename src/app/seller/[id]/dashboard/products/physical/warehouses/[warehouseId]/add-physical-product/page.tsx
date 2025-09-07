@@ -1,15 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import Button from "@/components/ui/Button";
-import { Upload, X, Plus, Trash2 } from "lucide-react";
-import { WarehouseSelector } from "@/components/warehouse/WarehouseSelector";
+import { Upload, X, Plus, Trash2, Search } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import Label from "@/components/ui/Label";
+import { WarehouseSelector } from "@/app/seller/Components/WarehouseSelector";
 import CreatableSelect from "react-select/creatable";
 import TipTapEditor from "@/components/TipTapEditor";
 import { toast } from "sonner";
 import Input from "@/components/ui/Input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/Select";
+import { form } from "framer-motion/client";
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
+import { ProductVariants } from "../../../../../../../Components/ProductVariants";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -52,20 +79,26 @@ interface ShippingLabel {
   estimatedDelivery: string;
 }
 
-interface ColorVariant {
-  color: string;
-  colorCode: string;
-}
-
-interface SizeVariant {
-  size: string;
-  stockQuantity: number;
-  sku: string;
-}
-
 interface Variant {
   name: string;
-  options: string[];
+  type: "text" | "number" | "date" | "color";
+  value: string;
+  quantity: number;
+}
+
+interface ImportedProduct {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  subcategory: string;
+  warehouse?: string;
+  sku?: string;
+  brand?: string;
+  weight?: number;
+  weightUnit?: string;
+  stockQuantity?: number;
+  [key: string]: any;
 }
 
 interface PhysicalProductFormData {
@@ -75,7 +108,9 @@ interface PhysicalProductFormData {
   subcategory: string;
   brand: string;
   tags: string;
-  basePrice: number;
+  wholesalePrice: number;
+  sellingPrice: number;
+  profitMargin: number;
   discountPrice: number;
   currency: string;
   stockQuantity: number;
@@ -99,13 +134,12 @@ interface PhysicalProductFormData {
   maxStockLevel?: number;
   // Variants
   variants: Variant[];
-  colorVariants: ColorVariant[];
   // Coupons
   coupons: Coupon[];
 }
 
 // واجهة المستودع
-interface Warehouse {
+export interface Warehouse {
   id: string;
   name: string;
   description: string;
@@ -124,24 +158,45 @@ export default function AddPhysicalProductPage() {
   const {
     register,
     handleSubmit,
-    control,
+    control, // kept if you extend later
     watch,
     formState: { errors },
+    setValue, // ✅ needed for handleImportFile
   } = useForm<PhysicalProductFormData>({
-    defaultValues: {
-      warehouseIds: [],
-    },
+    defaultValues: { warehouseIds: [] },
   });
 
   const [specifications, setSpecifications] = useState<
     { name: string; value: string }[]
   >([]);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [colorVariants, setColorVariants] = useState<ColorVariant[]>([]);
-  const [sizeVariants, setSizeVariants] = useState<SizeVariant[]>([]);
+  const [totalQuantity, setTotalQuantity] = useState<number>(0);
+
+  // تحديث إجمالي الكمية عند تغيير كميات المتغيرات
+  useEffect(() => {
+    if (variants.length > 0) {
+      const newTotal = variants.reduce(
+        (sum, variant) => sum + variant.quantity,
+        0
+      );
+      setTotalQuantity(newTotal);
+    }
+  }, [variants]);
+  const [selectedColor, setSelectedColor] = useState<{
+    color: string;
+    colorCode: string;
+  } | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [newVariantQuantity, setNewVariantQuantity] = useState<number>(0);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+
   const [shippingLabels, setShippingLabels] = useState<ShippingLabel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [importedProducts, setImportedProducts] = useState<ImportedProduct[]>(
+    []
+  );
+  const [showImportDialog, setShowImportDialog] = useState(false);
+
   // قائمة المستودعات المتاحة
   const [warehouses, setWarehouses] = useState<Warehouse[]>([
     {
@@ -185,51 +240,27 @@ export default function AddPhysicalProductPage() {
   const [selectedWarehouses, setSelectedWarehouses] = useState<Warehouse[]>([]);
   const [availableQuantity, setAvailableQuantity] = useState(0);
 
-  // حساب إجمالي المخزون من المستودعات
-  const calculateTotalStock = (warehouses: Warehouse[]) => {
-    return warehouses.reduce(
-      (total, warehouse) => total + (warehouse.stock || 0),
-      0
-    );
-  };
-
-  // تحديث الكمية المتوفرة عند تغيير المخزون
-  useEffect(() => {
-    if (selectedWarehouses.length > 0) {
-      const totalStock = calculateTotalStock(selectedWarehouses);
-      setAvailableQuantity(totalStock);
-    }
-  }, [selectedWarehouses]);
-
-  // التعامل مع تغيير الكمية المتوفرة
-  const handleAvailableQuantityChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = parseInt(e.target.value) || 0;
-    if (value >= 0) {
-      setAvailableQuantity(value);
-    }
-  };
-
-  // إضافة مستودع
+  // إضافة مستودع (مع منع التكرار)
   const handleWarehouseSelect = (warehouse: Warehouse) => {
-    setSelectedWarehouses((prev) => [
-      ...prev,
-      { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
-    ]);
+    setSelectedWarehouses((prev) => {
+      if (prev.some((w) => w.id === warehouse.id)) return prev; // لا تكرر
+      return [
+        ...prev,
+        { ...warehouse, stock: 0, isPrimary: prev.length === 0 },
+      ];
+    });
   };
 
   // إزالة مستودع
   const handleWarehouseRemove = (warehouseId: string) => {
     setSelectedWarehouses((prev) => {
       const newWarehouses = prev.filter((w) => w.id !== warehouseId);
-      // إذا تم إزالة المستودع الرئيسي وهناك مستودعات أخرى،
-      // اجعل المستودع الأول هو الرئيسي
+      // لو تم حذف الرئيسي، عيّن أول واحد كرئيسي
       if (
         prev.find((w) => w.id === warehouseId)?.isPrimary &&
         newWarehouses.length > 0
       ) {
-        newWarehouses[0].isPrimary = true;
+        newWarehouses[0] = { ...newWarehouses[0], isPrimary: true };
       }
       return newWarehouses;
     });
@@ -249,25 +280,128 @@ export default function AddPhysicalProductPage() {
     );
   };
 
+  // التعامل مع تغيير الكمية المتوفرة
+  const handleAvailableQuantityChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = Number.parseInt(e.target.value || "0", 10) || 0;
+    if (value >= 0) setAvailableQuantity(value);
+  };
+
+  async function handleImportFile(file: File): Promise<ImportedProduct[]> {
+    return new Promise((resolve, reject) => {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+
+      if (ext === "csv") {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const data: ImportedProduct[] = results.data.map((row: any) => ({
+              name: row.name || "",
+              description: row.description || "",
+              price: parseFloat(row.price) || 0,
+              category: row.category || "",
+              subcategory: row.subcategory || "",
+              warehouse: row.warehouse || "",
+              sku: row.sku || "",
+              brand: row.brand || "",
+              weight: row.weight ? parseFloat(row.weight) : undefined,
+              weightUnit: row.weightUnit || "",
+              stockQuantity: row.stockQuantity
+                ? parseInt(row.stockQuantity, 10)
+                : undefined,
+            }));
+            resolve(data);
+          },
+          error: (err) => reject(err),
+        });
+      } else if (ext === "xlsx" || ext === "xls") {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+          const products: ImportedProduct[] = jsonData.map((row: any) => ({
+            name: row.name || "",
+            description: row.description || "",
+            price: parseFloat(row.price) || 0,
+            category: row.category || "",
+            subcategory: row.subcategory || "",
+            warehouse: row.warehouse || "",
+            sku: row.sku || "",
+            brand: row.brand || "",
+            weight: row.weight ? parseFloat(row.weight) : undefined,
+            weightUnit: row.weightUnit || "",
+            stockQuantity: row.stockQuantity
+              ? parseInt(row.stockQuantity, 10)
+              : undefined,
+          }));
+
+          resolve(products);
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsArrayBuffer(file);
+      } else {
+        reject(new Error("Unsupported file type. Please upload CSV or XLSX."));
+      }
+    });
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const importedProducts = await handleImportFile(file);
+        // setProducts(importedProducts);
+        console.log("Imported:", importedProducts);
+      } catch (err) {
+        console.error("Import failed:", err);
+      }
+    }
+  };
+
+  // حفظ المنتجات المستوردة بعد تخصيص المستودعات
+  const handleSaveImportedProducts = () => {
+    const allProductsHaveWarehouse = importedProducts.every((p) => p.warehouse);
+    if (!allProductsHaveWarehouse) {
+      toast.error("يرجى اختيار مستودع لجميع المنتجات");
+      return;
+    }
+    console.log("Saving imported products:", importedProducts);
+    toast.success("تم حفظ المنتجات بنجاح");
+    setShowImportDialog(false);
+    setImportedProducts([]);
+  };
+
   const [showAlert, setShowAlert] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
+  // submit
   const onSubmit = (data: PhysicalProductFormData) => {
-    // Add specifications, variants, coupons, shipping labels, and selected warehouses to form data
     const formData = {
       ...data,
-      variants: variants,
-      colorVariants: colorVariants,
-      sizeVariants: sizeVariants,
-      coupons: coupons,
-      shippingLabels: shippingLabels,
-      selectedWarehouses: selectedWarehouses,
-    };
-    console.log(formData);
+      variants,
 
-    // عرض رسالة نجاح مع عدد المستودعات المختارة
+      coupons,
+      shippingLabels,
+      selectedWarehouses,
+    };
+    const totalVariantsQuantity = variants.reduce(
+      (sum, variant) => sum + variant.quantity,
+      0
+    );
+    const isQuantityValid = totalVariantsQuantity === availableQuantity;
+
+    if (!isQuantityValid) {
+      alert("يجب ان يساوي عدد النسخ عدد الكميه المتوفره");
+    }
+    console.log(formData);
     const warehouseCount = selectedWarehouses.length;
     toast.success(
       `تم حفظ المنتج المادي بنجاح في ${warehouseCount} مستودع${
@@ -276,189 +410,99 @@ export default function AddPhysicalProductPage() {
     );
   };
 
-  const addSpecification = () => {
-    setSpecifications([...specifications, { name: "", value: "" }]);
-  };
+  // const addCoupon = () => {
+  //   setCoupons([
+  //     ...coupons,
+  //     {
+  //       code: "",
+  //       type: "percentage",
+  //       value: 0,
+  //       startDate: "",
+  //       endDate: "",
+  //       usageLimit: 0,
+  //       minPurchaseAmount: 0,
+  //     },
+  //   ]);
+  //   setShowAlert({ message: "تم إضافة كوبون جديد", type: "success" });
+  //   setTimeout(() => setShowAlert(null), 3000);
+  // };
 
-  const removeSpecification = (index: number) => {
-    setSpecifications(specifications.filter((_, i) => i !== index));
-  };
+  // const removeCoupon = (index: number) => {
+  //   setCoupons(coupons.filter((_, i) => i !== index));
+  //   setShowAlert({ message: "تم حذف الكوبون", type: "success" });
+  //   setTimeout(() => setShowAlert(null), 3000);
+  // };
 
-  const updateSpecification = (
-    index: number,
-    field: "name" | "value",
-    value: string
-  ) => {
-    const newSpecifications = [...specifications];
-    newSpecifications[index][field] = value;
-    setSpecifications(newSpecifications);
-  };
+  // const updateCoupon = (index: number, field: keyof Coupon, value: any) => {
+  //   const newCoupons = [...coupons];
+  //   newCoupons[index] = { ...newCoupons[index], [field]: value };
+  //   setCoupons(newCoupons);
+  // };
 
-  const addVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        name: "",
-        options: [],
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة متغير جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
+  // const addShippingLabel = () => {
+  //   setShippingLabels([
+  //     ...shippingLabels,
+  //     {
+  //       awbNumber: "",
+  //       carrier: "",
+  //       status: "pending",
+  //       trackingUrl: "",
+  //       shippingDate: "",
+  //       estimatedDelivery: "",
+  //     },
+  //   ]);
+  //   setShowAlert({ message: "تم إضافة ملصق شحن جديد", type: "success" });
+  //   setTimeout(() => setShowAlert(null), 3000);
+  // };
 
-  const removeVariant = (index: number) => {
-    setVariants(variants.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف المتغير", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
+  // const removeShippingLabel = (index: number) => {
+  //   setShippingLabels(shippingLabels.filter((_, i) => i !== index));
+  //   setShowAlert({ message: "تم حذف ملصق الشحن", type: "success" });
+  //   setTimeout(() => setShowAlert(null), 3000);
+  // };
 
-  const updateVariant = (index: number, field: keyof Variant, value: any) => {
-    const newVariants = [...variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
-    setVariants(newVariants);
-  };
-
-  const addVariantOption = (variantIndex: number, option: string) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].options = [
-      ...newVariants[variantIndex].options,
-      option,
-    ];
-    setVariants(newVariants);
-  };
-
-  const removeVariantOption = (variantIndex: number, optionIndex: number) => {
-    const newVariants = [...variants];
-    newVariants[variantIndex].options = newVariants[
-      variantIndex
-    ].options.filter((_, i) => i !== optionIndex);
-    setVariants(newVariants);
-  };
-
-  const addColorVariant = () => {
-    setColorVariants([
-      ...colorVariants,
-      {
-        color: "",
-        colorCode: "#000000",
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة لون جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const removeColorVariant = (index: number) => {
-    setColorVariants(colorVariants.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف اللون", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const updateColorVariant = (
-    index: number,
-    field: keyof ColorVariant,
-    value: any
-  ) => {
-    const newColorVariants = [...colorVariants];
-    newColorVariants[index] = { ...newColorVariants[index], [field]: value };
-    setColorVariants(newColorVariants);
-  };
-
-  const addSizeVariant = () => {
-    setSizeVariants([
-      ...sizeVariants,
-      {
-        size: "",
-        stockQuantity: 0,
-        sku: "",
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة مقاس جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const removeSizeVariant = (sizeIndex: number) => {
-    setSizeVariants(sizeVariants.filter((_, i) => i !== sizeIndex));
-    setShowAlert({ message: "تم حذف المقاس", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const updateSizeVariant = (
-    sizeIndex: number,
-    field: keyof SizeVariant,
-    value: any
-  ) => {
-    const newSizeVariants = [...sizeVariants];
-    newSizeVariants[sizeIndex] = {
-      ...newSizeVariants[sizeIndex],
-      [field]: value,
-    };
-    setSizeVariants(newSizeVariants);
-  };
-
-  const addCoupon = () => {
-    setCoupons([
-      ...coupons,
-      {
-        code: "",
-        type: "percentage",
-        value: 0,
-        startDate: "",
-        endDate: "",
-        usageLimit: 0,
-        minPurchaseAmount: 0,
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة كوبون جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const removeCoupon = (index: number) => {
-    setCoupons(coupons.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف الكوبون", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const updateCoupon = (index: number, field: keyof Coupon, value: any) => {
-    const newCoupons = [...coupons];
-    newCoupons[index] = { ...newCoupons[index], [field]: value };
-    setCoupons(newCoupons);
-  };
-
-  const addShippingLabel = () => {
-    setShippingLabels([
-      ...shippingLabels,
-      {
-        awbNumber: "",
-        carrier: "",
-        status: "pending",
-        trackingUrl: "",
-        shippingDate: "",
-        estimatedDelivery: "",
-      },
-    ]);
-    setShowAlert({ message: "تم إضافة ملصق شحن جديد", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const removeShippingLabel = (index: number) => {
-    setShippingLabels(shippingLabels.filter((_, i) => i !== index));
-    setShowAlert({ message: "تم حذف ملصق الشحن", type: "success" });
-    setTimeout(() => setShowAlert(null), 3000);
-  };
-
-  const updateShippingLabel = (
-    index: number,
-    field: keyof ShippingLabel,
-    value: any
-  ) => {
-    const newShippingLabels = [...shippingLabels];
-    newShippingLabels[index] = { ...newShippingLabels[index], [field]: value };
-    setShippingLabels(newShippingLabels);
-  };
+  // const updateShippingLabel = (
+  //   index: number,
+  //   field: keyof ShippingLabel,
+  //   value: any
+  // ) => {
+  //   const newShippingLabels = [...shippingLabels];
+  //   newShippingLabels[index] = { ...newShippingLabels[index], [field]: value };
+  //   setShippingLabels(newShippingLabels);
+  // };
 
   const filteredWarehouses = warehouses.filter((warehouse) =>
     warehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const wholesalePrice = watch("wholesalePrice");
+  const sellingPrice = watch("sellingPrice");
+  const profitMargin = watch("profitMargin");
+
+  // لو المستخدم غيّر نسبة الربح → احسب سعر البيع
+  useEffect(() => {
+    if (wholesalePrice > 0 && profitMargin > 0) {
+      const newSellPrice = wholesalePrice * (1 + profitMargin / 100);
+      const rounded = parseFloat(newSellPrice.toFixed(2));
+
+      if (sellingPrice !== rounded) {
+        setValue("sellingPrice", rounded, { shouldValidate: true });
+      }
+    }
+  }, [profitMargin, wholesalePrice]);
+
+  // لو المستخدم غيّر سعر البيع → احسب نسبة الربح
+  useEffect(() => {
+    if (wholesalePrice > 0 && sellingPrice > 0) {
+      const newProfitRatio =
+        ((sellingPrice - wholesalePrice) / wholesalePrice) * 100;
+      const rounded = parseFloat(newProfitRatio.toFixed(2));
+
+      if (profitMargin !== rounded) {
+        setValue("profitMargin", rounded, { shouldValidate: true });
+      }
+    }
+  }, [sellingPrice, wholesalePrice]);
+
   return (
     <motion.div
       initial="hidden"
@@ -478,7 +522,79 @@ export default function AddPhysicalProductPage() {
           {showAlert.message}
         </motion.div>
       )}
-      <h1 className="text-2xl font-bold mb-8">إضافة منتج مادي جديد</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">إضافة منتج مادي جديد</h1>
+        <Button
+          variant="primary"
+          className="gap-2"
+          onClick={() => setShowImportDialog(true)}
+        >
+          <Upload className="w-4 h-4" />
+          استيراد منتجات
+        </Button>
+        <Dialog open={showImportDialog} setOpen={setShowImportDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>استيراد منتجات</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="importFile" className="min-w-[100px]">
+                  اختر ملف:
+                </Label>
+                <Input
+                  id="importFile"
+                  type="file"
+                  accept=".csv,.xlsx"
+                  onChange={handleFileChange}
+                />
+              </div>
+              {importedProducts.length > 0 && (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>اسم المنتج</TableHead>
+                      <TableHead>السعر</TableHead>
+                      <TableHead>التصنيف</TableHead>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>الكمية</TableHead>
+                      <TableHead>المستودع</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {importedProducts.map((product, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{product.name}</TableCell>
+                        <TableCell>{product.price}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>{product.sku}</TableCell>
+                        <TableCell>{product.stockQuantity}</TableCell>
+                        <TableCell>
+                          <WarehouseSelector
+                            value={product.warehouse}
+                            onChange={(value) =>
+                              handleWarehouseSelect(index, value)
+                            }
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+              <div className="flex justify-end mt-4">
+                <Button
+                  variant="primary"
+                  onClick={handleSaveImportedProducts}
+                  disabled={importedProducts.length === 0}
+                >
+                  حفظ المنتجات
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
@@ -502,17 +618,6 @@ export default function AddPhysicalProductPage() {
                   {errors.name.message}
                 </p>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                رمز المنتج (SKU)
-              </label>
-              <Input
-                type="text"
-                {...register("sku")}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
             </div>
 
             <div>
@@ -571,30 +676,6 @@ export default function AddPhysicalProductPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                العلامة التجارية
-              </label>
-              <Controller
-                name="brand"
-                control={control}
-                render={({ field }) => (
-                  <CreatableSelect
-                    {...field}
-                    placeholder="اختر أو أضف علامة تجارية"
-                    options={[
-                      { value: "نايك", label: "نايك" },
-                      { value: "أديداس", label: "أديداس" },
-                      { value: "بوما", label: "بوما" },
-                      { value: "ريبوك", label: "ريبوك" },
-                    ]}
-                    className="react-select"
-                    classNamePrefix="react-select"
-                  />
-                )}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 الكلمات المفتاحية
               </label>
               <Input
@@ -616,20 +697,56 @@ export default function AddPhysicalProductPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                السعر الأساسي *
+                سعر الجملة *
               </label>
               <Input
                 type="number"
-                step="0.01"
-                {...register("basePrice", {
-                  required: "السعر الأساسي مطلوب",
+                step="1"
+                {...register("wholesalePrice", {
+                  required: "سعر الجملة مطلوب",
                   min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
                 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
-              {errors.basePrice && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.basePrice.message}
+              {errors.wholesalePrice && (
+                <p className="text-sm text-red-600">
+                  {errors.wholesalePrice.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                سعر البيع *
+              </label>
+              <Input
+                type="number"
+                step="1"
+                {...register("sellingPrice", {
+                  required: "سعر البيع مطلوب",
+                  min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
+                })}
+              />
+              {errors.sellingPrice && (
+                <p className="text-sm text-red-600">
+                  {errors.sellingPrice.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                نسبة الربح (%)
+              </label>
+              <Input
+                type="number"
+                step="1"
+                {...register("profitMargin", {
+                  min: { value: 0, message: "النسبة يجب أن تكون أكبر من 0" },
+                })}
+              />
+              {errors.profitMargin && (
+                <p className="text-sm text-red-600">
+                  {errors.profitMargin.message}
                 </p>
               )}
             </div>
@@ -640,35 +757,27 @@ export default function AddPhysicalProductPage() {
               </label>
               <Input
                 type="number"
-                step="0.01"
+                step="1"
                 {...register("discountPrice", {
                   min: { value: 0, message: "السعر يجب أن يكون أكبر من 0" },
                 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               {errors.discountPrice && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="text-sm text-red-600">
                   {errors.discountPrice.message}
                 </p>
               )}
             </div>
-
-            <div>
-              <label className="flex items-center gap-2">
-                <Input
-                  type="checkbox"
-                  {...register("allowBackorders")}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  السماح بالطلب المسبق
-                </span>
-              </label>
-            </div>
           </div>
         </motion.section>
 
-        {/* Digital Warehouses Selection */}
+        <motion.section
+          variants={itemVariants}
+          className="bg-white rounded-xl p-6 shadow-sm"
+        >
+          <div className="text-xl font-bold">المستودع : مستودع Nike</div>
+        </motion.section>
+        {/* Digital Warehouses Selection
         <WarehouseSelector
           warehouses={warehouses}
           selectedWarehouses={selectedWarehouses}
@@ -679,7 +788,7 @@ export default function AddPhysicalProductPage() {
           availableQuantity={availableQuantity}
           handleAvailableQuantityChange={handleAvailableQuantityChange}
           error={errors.warehouseIds?.message}
-        />
+        /> */}
 
         {/* Dimensions & Weight */}
         <motion.section
@@ -695,7 +804,7 @@ export default function AddPhysicalProductPage() {
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  step="0.01"
+                  step="1"
                   {...register("weight", {
                     required: "الوزن مطلوب",
                     min: { value: 0, message: "الوزن يجب أن يكون أكبر من 0" },
@@ -725,7 +834,7 @@ export default function AddPhysicalProductPage() {
               </label>
               <Input
                 type="number"
-                step="0.01"
+                step="1"
                 {...register("length", {
                   required: "الطول مطلوب",
                   min: { value: 0, message: "الطول يجب أن يكون أكبر من 0" },
@@ -745,7 +854,7 @@ export default function AddPhysicalProductPage() {
               </label>
               <Input
                 type="number"
-                step="0.01"
+                step="1"
                 {...register("width", {
                   required: "العرض مطلوب",
                   min: { value: 0, message: "العرض يجب أن يكون أكبر من 0" },
@@ -766,7 +875,7 @@ export default function AddPhysicalProductPage() {
               <div className="flex gap-2">
                 <Input
                   type="number"
-                  step="0.01"
+                  step="1"
                   {...register("height", {
                     required: "الارتفاع مطلوب",
                     min: {
@@ -795,279 +904,16 @@ export default function AddPhysicalProductPage() {
           </div>
         </motion.section>
 
-        {/* General Variants */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <h2 className="text-xl font-semibold mb-6">المتغيرات </h2>
-          <div className="space-y-6">
-            {variants.map((variant, index) => (
-              <div
-                key={index}
-                className="border border-gray-300 rounded-lg p-4"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      اسم المتغير
-                    </label>
-                    <Input
-                      type="text"
-                      value={variant.name}
-                      onChange={(e) =>
-                        updateVariant(index, "name", e.target.value)
-                      }
-                      placeholder="مثال: المساحة، الإصدار، اللون"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  <button
-                    onClick={() => removeVariant(index)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الخيارات
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {variant.options.map((option, optionIndex) => (
-                      <div
-                        key={optionIndex}
-                        className="flex items-center bg-gray-100 rounded-lg px-3 py-1"
-                      >
-                        <span>{option}</span>
-                        <button
-                          onClick={() =>
-                            removeVariantOption(index, optionIndex)
-                          }
-                          className="ml-2 text-gray-500 hover:text-red-500"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Input
-                      type="text"
-                      placeholder="أضف خيار جديد"
-                      className="flex-grow px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const target = e.target as HTMLInputElement;
-                          if (target.value.trim()) {
-                            addVariantOption(index, target.value.trim());
-                            target.value = "";
-                          }
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      onClick={(e) => {
-                        const input = e.currentTarget
-                          .previousElementSibling as HTMLInputElement;
-                        if (input.value.trim()) {
-                          addVariantOption(index, input.value.trim());
-                          input.value = "";
-                        }
-                      }}
-                    >
-                      إضافة
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <Button
-              variant="outline"
-              onClick={addVariant}
-              type="button"
-              className="w-full flex items-center justify-center gap-2"
-            >
-              <Plus size={16} />
-              إضافة متغير جديد
-            </Button>
-          </div>
-        </motion.section>
-
-        {/* Color Variants */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">الألوان</h2>
-            <Button
-              type="button"
-              onClick={addColorVariant}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              إضافة لون
-            </Button>
-          </div>
-
-          {colorVariants.length === 0 && (
-            <p className="text-gray-500 text-center py-4">
-              لا توجد ألوان مضافة. أضف لون جديد للبدء.
-            </p>
-          )}
-
-          {colorVariants.map((colorVariant, colorIndex) => (
-            <div
-              key={colorIndex}
-              className="mb-6 p-4 border border-gray-200 rounded-lg"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-medium">لون #{colorIndex + 1}</h3>
-                <button
-                  type="button"
-                  onClick={() => removeColorVariant(colorIndex)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    اسم اللون
-                  </label>
-                  <Input
-                    type="text"
-                    value={colorVariant.color}
-                    onChange={(e) =>
-                      updateColorVariant(colorIndex, "color", e.target.value)
-                    }
-                    placeholder="مثال: أحمر، أزرق، أسود"
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    كود اللون
-                  </label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={colorVariant.colorCode}
-                      onChange={(e) =>
-                        updateColorVariant(
-                          colorIndex,
-                          "colorCode",
-                          e.target.value
-                        )
-                      }
-                      className="h-10 w-10 border border-gray-200 rounded"
-                    />
-                    <Input
-                      type="text"
-                      value={colorVariant.colorCode}
-                      onChange={(e) =>
-                        updateColorVariant(
-                          colorIndex,
-                          "colorCode",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </motion.section>
-
-        {/* Size Variants */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-white rounded-xl p-6 shadow-sm"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">المقاسات</h2>
-            <Button
-              type="button"
-              onClick={addSizeVariant}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              إضافة مقاس
-            </Button>
-          </div>
-
-          {sizeVariants.length === 0 && (
-            <p className="text-gray-500 text-center py-4">
-              لا توجد مقاسات مضافة. أضف مقاس جديد للبدء.
-            </p>
-          )}
-
-          {sizeVariants.map((sizeVariant, sizeIndex) => (
-            <div
-              key={sizeIndex}
-              className="grid grid-cols-12 gap-2 items-center mb-2 p-2 bg-gray-50 rounded"
-            >
-              <div className="col-span-3">
-                <Input
-                  type="text"
-                  value={sizeVariant.size}
-                  onChange={(e) =>
-                    updateSizeVariant(sizeIndex, "size", e.target.value)
-                  }
-                  placeholder="المقاس"
-                  className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div className="col-span-3">
-                <Input
-                  type="number"
-                  value={sizeVariant.stockQuantity}
-                  onChange={(e) =>
-                    updateSizeVariant(
-                      sizeIndex,
-                      "stockQuantity",
-                      parseInt(e.target.value)
-                    )
-                  }
-                  placeholder="الكمية"
-                  className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div className="col-span-5">
-                <Input
-                  type="text"
-                  value={sizeVariant.sku}
-                  onChange={(e) =>
-                    updateSizeVariant(sizeIndex, "sku", e.target.value)
-                  }
-                  placeholder="رمز المنتج (SKU)"
-                  className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div className="col-span-1 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => removeSizeVariant(sizeIndex)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </motion.section>
+        {/* Variants */}
+        <ProductVariants
+          wholesalePrice={wholesalePrice}
+          sellingPrice={sellingPrice}
+          profitMargin={profitMargin}
+          variants={variants}
+          setVariants={setVariants}
+          isDigital={false}
+          totalQuantity={availableQuantity}
+        />
 
         {/* Shipping Labels
         <motion.section

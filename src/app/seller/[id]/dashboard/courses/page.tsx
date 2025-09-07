@@ -332,10 +332,7 @@ export default function CoursesPage() {
                   </div>
                 </Link>
                 <div className="p-6">
-                  <div
-                    onClick={() => setSelectedCourse(course)}
-                    className="cursor-pointer"
-                  >
+                  <div className="cursor-pointer">
                     <h3 className="font-semibold text-lg mb-2">
                       {course.title}
                     </h3>
@@ -387,89 +384,6 @@ export default function CoursesPage() {
             ))}
           </div>
         </>
-      )}
-
-      {/* Course Content View (Udemy-like) */}
-      {selectedCourse && (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSelectedCourse(null)}
-                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-arrow-right"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-              <h2 className="text-xl font-bold">{selectedCourse.title}</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">
-                {selectedCourse.lessonsCount} دروس
-              </span>
-              <span className="mx-2">•</span>
-              <span className="text-sm text-gray-500">
-                {selectedCourse.enrolledStudents} طالب
-              </span>
-            </div>
-          </div>
-
-          {/* Course Units and Lessons */}
-          <div className="space-y-4">
-            {selectedCourse.units?.map((unit, unitIndex) => (
-              <div
-                key={unit.id}
-                className="border border-gray-200 rounded-lg overflow-hidden"
-              >
-                <div className="bg-gray-50 p-4 flex justify-between items-center">
-                  <h3 className="font-medium">
-                    الوحدة {unitIndex + 1}: {unit.title}
-                  </h3>
-                  <span className="text-sm text-gray-500">
-                    {unit.lessons.length} دروس
-                  </span>
-                </div>
-                <div className="divide-y divide-gray-200">
-                  {unit.lessons.map((lesson, lessonIndex) => (
-                    <div
-                      key={lesson.id}
-                      className="p-4 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-gray-500">
-                            {unitIndex + 1}.{lessonIndex + 1}
-                          </span>
-                          <h4 className="font-medium">{lesson.title}</h4>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-gray-500">
-                            {lesson.duration}
-                          </span>
-                          <button className="p-1 text-gray-400 hover:text-purple-600 transition-colors">
-                            <Edit2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       )}
     </motion.div>
   );

@@ -541,9 +541,6 @@ export default function CourseLessonsPage({
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     آخر نشاط
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -579,11 +576,6 @@ export default function CourseLessonsPage({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {student.lastActive}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                      <button className="text-purple-600 hover:text-purple-900">
-                        عرض التفاصيل
-                      </button>
                     </td>
                   </tr>
                 ))}

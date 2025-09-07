@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/Dropdown";
 import { useAuth, UserType } from "@/context/AuthContext";
 import { Search } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const headerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -188,6 +189,10 @@ export default function Navbar() {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
+  const pathname = usePathname();
+  if (pathname.includes("dashboard")) {
+    return null;
+  }
   return (
     <header dir="rtl" className={`${darkMode ? "dark" : ""}`}>
       <TopSaleBanner />
@@ -199,7 +204,7 @@ export default function Navbar() {
         className="!bg-white shadow-lg border-b border-gray-200 relative"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-[85px] items-center justify-between">
-          {/* Right Side - Hamburger Menu and Search */}
+          {/* Right Side (موبايل: القائمة + البحث) */}
           <motion.div
             variants={itemVariants}
             className="flex items-center flex-1 gap-3 order-1"
@@ -217,7 +222,6 @@ export default function Navbar() {
             >
               <Search className="text-purple-600" size={20} />
             </button>
-
             <SearchModal open={searchModalOpen} setOpen={setSearchModalOpen} />
           </motion.div>
 
@@ -226,22 +230,29 @@ export default function Navbar() {
             <Image src="/logo.svg" width={100} height={100} alt="logo" />
           </Link>
 
-          {/* Left Side - Icons */}
+          {/* Left Side (الأيقونات) */}
           <div className="flex items-center gap-3 justify-end flex-1 order-3">
+            {/* Dark Mode toggle - يظهر فقط في الشاشات الكبيرة */}
             <button
               onClick={toggleDarkMode}
-              className="text-xl rounded-full hover:bg-gray-100 transition-colors"
+              className="hidden md:flex text-xl rounded-full hover:bg-gray-100 transition-colors"
             >
               {darkMode ? <FiSun /> : <FiMoon />}
             </button>
-            <div className="text-xl">
-              <Link href={"/wishlist"} className="text-xl">
+
+            {/* Wishlist - يظهر فقط من md وفوق */}
+            <div className="hidden md:flex text-xl">
+              <Link href={"/wishlist"}>
                 <FiHeart className="cursor-pointer hover:text-purple-600 transition-colors" />
               </Link>
             </div>
+
+            {/* Cart - يظهر دايمًا */}
             <Link href={"/cart"} className="text-xl">
               <FiShoppingCart className="cursor-pointer hover:text-purple-600 transition-colors" />
             </Link>
+
+            {/* User / Login */}
             {user ? (
               <UserDropdown
                 dropdownOpen={dropdownOpen}
@@ -251,7 +262,10 @@ export default function Navbar() {
               />
             ) : (
               <>
-                <Button onClick={() => setLoginModalOpen(true)}>
+                <Button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="hidden md:block"
+                >
                   تسجيل الدخول
                 </Button>
                 <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />
@@ -271,7 +285,6 @@ export default function Navbar() {
           <span className="font-bold text-lg">القائمة</span>
           <FiX className="cursor-pointer" onClick={toggleSidebar} />
         </div>
-
         <div className="p-4">
           <RecursiveMenu items={menuData} toggleSidebar={toggleSidebar} />
         </div>

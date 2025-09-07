@@ -53,6 +53,14 @@ export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
+  React.useEffect(() => {
+    if (warehouses.length > 0 && selectedWarehouses.length === 0) {
+      const firstWarehouse = warehouses[0];
+      onWarehouseSelect(firstWarehouse);
+      onPrimaryWarehouseChange(firstWarehouse.id);
+    }
+  }, [warehouses]);
+
   const filteredWarehouses = warehouses.filter(
     (warehouse) =>
       warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,7 +72,12 @@ export const WarehouseSelector: React.FC<WarehouseSelectorProps> = ({
   const handleStockChange = (warehouseId: string, value: string) => {
     const stock = parseInt(value) || 0;
     if (stock >= 0) {
+      const totalStock = selectedWarehouses.reduce((sum, w) => {
+        return sum + (w.id === warehouseId ? stock : w.stock || 0);
+      }, 0);
+      
       onStockChange(warehouseId, stock);
+      handleAvailableQuantityChange({ target: { value: totalStock.toString() } } as React.ChangeEvent<HTMLInputElement>);
     }
   };
 

@@ -41,9 +41,9 @@ import {
   TableCell,
 } from "@/components/ui/Table";
 import Label from "@/components/ui/Label";
-import { div } from "framer-motion/client";
-import AddWarehouseDialog from "../../../../Components/AddWarehouseDialog";
-import { warehouseStatusColors } from "../../../../utils";
+import AddWarehouseDialog from "../../../../../Components/AddWarehouseDialog";
+import { warehouseStatusColors } from "../../../../../utils";
+import { usePathname } from "next/navigation";
 
 // تعريف أنواع البيانات
 interface DigitalItem {
@@ -349,6 +349,7 @@ export default function DigitalWarehousesPage() {
     }
   };
 
+  const pathname = usePathname();
   return (
     <motion.div
       initial="hidden"
@@ -388,8 +389,8 @@ export default function DigitalWarehousesPage() {
         {filteredWarehouses.length > 0 ? (
           filteredWarehouses.map((warehouse) => (
             <Link
-              href={`/seller/[id]/dashboard/products/digital/warehouses${warehouse.id}`}
-              as={`/seller/1/dashboard/products/digital/warehouses${warehouse.id}`}
+              href={`${pathname}/${warehouse.id}`}
+              as={`/seller/1/dashboard/products/digital/warehouses/${warehouse.id}`}
               key={warehouse.id}
             >
               <Card className="h-full hover:border-primary transition-all cursor-pointer">

@@ -41,10 +41,9 @@ import {
 } from "@/components/ui/Table";
 import Label from "@/components/ui/Label";
 import { Product } from "@/context/CartContext";
-import { div } from "framer-motion/client";
 import AddWarehouseDialog from "../../../../../Components/AddWarehouseDialog";
-import { bg } from "date-fns/locale";
 import { formatDate } from "../../../../../utils";
+import { usePathname } from "next/navigation";
 // تعريف أنواع البيانات
 interface Product {
   id: string;
@@ -255,12 +254,6 @@ export default function WarehousesPage() {
   const [isAddWarehouseDialogOpen, setIsAddWarehouseDialogOpen] =
     useState(false);
 
-  // اختيار مستودع
-  const handleSelectWarehouse = (warehouse: Warehouse) => {
-    setSelectedWarehouse(warehouse);
-  };
-
-  // إضافة مستودع جديد
   const handleAddWarehouse = (
     newWarehouse: Omit<
       Warehouse,
@@ -296,6 +289,7 @@ export default function WarehousesPage() {
       warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       warehouse.location.city.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const pathname = usePathname();
 
   return (
     <div className="p-6 space-y-6">
@@ -330,9 +324,7 @@ export default function WarehousesPage() {
       >
         {filteredWarehouses.map((warehouse) => (
           <motion.div key={warehouse.id} variants={itemVariants}>
-            <Link
-              href={`/seller/1/dashboard/products/physical/warehouses${warehouse.id}`}
-            >
+            <Link href={`${pathname}/${warehouse.id}`}>
               <Card className="cursor-pointer  !border-gray-300 transition-colors">
                 <CardHeader className="space-y-4">
                   <div className="flex items-start justify-between">

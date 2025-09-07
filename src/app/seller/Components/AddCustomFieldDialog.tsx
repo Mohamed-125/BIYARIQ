@@ -10,6 +10,7 @@ import Label from "../../../components/ui/Label";
 import Input from "../../../components/ui/Input";
 import Button from "../../../components/ui/Button";
 import { toast } from "sonner";
+import { Warehouse } from "../[id]/dashboard/products/physical/warehouses/[warehouseId]/add-physical-product/page";
 interface CustomField {
   id: string;
   name: string;
@@ -23,6 +24,11 @@ const AddCustomFieldDialog = ({
   warehouse,
   setWarehouse,
   onSubmit,
+}: {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  warehouse: any;
+  setWarehouse: (value: any) => void;
 }) => {
   const [selectedType, setSelectedType] = useState<
     "text" | "date" | "number" | "url" | "file"
