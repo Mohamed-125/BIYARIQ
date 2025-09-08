@@ -73,7 +73,7 @@ export default function PhysicalProductsPage() {
           <motion.div key={product.id} variants={itemVariants}>
             <div className="group relative">
               <ProductCard removeTopButtons={true} product={product} />
-              <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-2 left-2 flex gap-2 opacity-0  ">
                 <button className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors">
                   <Link
                     href={

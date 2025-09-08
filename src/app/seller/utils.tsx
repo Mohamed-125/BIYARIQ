@@ -22,6 +22,7 @@ import {
   HeadphoneOff,
   Headphones,
   PersonStanding,
+  BarChart,
 } from "lucide-react";
 import { CiMoneyBill } from "react-icons/ci";
 
@@ -46,7 +47,53 @@ export const sidebarLinks = [
       },
     ],
   },
-
+  {
+    href: "/seller/test-seller/dashboard/reports",
+    icon: BarChart,
+    label: "التقارير",
+    subItems: [
+      {
+        href: "/seller/test-seller/dashboard/reports",
+        label: "نظرة عامة",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/sales",
+        label: "المبيعات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/orders",
+        label: "الطلبات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/profits",
+        label: "الأرباح",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/products",
+        label: "المنتجات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/returns",
+        label: "المرتجعات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/inventory",
+        label: "المخزون",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/ratings",
+        label: "التقييمات",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/customers",
+        label: "العملاء",
+      },
+      {
+        href: "/seller/test-seller/dashboard/reports/export",
+        label: "تصدير التقارير",
+      },
+    ],
+  },
   {
     href: "/seller/test-seller/dashboard/products/physical/",
     icon: BoxesIcon,
@@ -56,7 +103,6 @@ export const sidebarLinks = [
         href: "/seller/test-seller/dashboard/products/physical",
         label: "المنتجات المادية",
       },
-
       {
         href: "/seller/test-seller/dashboard/products/physical/warehouses",
         label: "المستودعات الماديه",

@@ -51,11 +51,6 @@ export default function Products() {
             </div>
 
             <div className="space-y-2">
-              <label>رمز المنتج (SKU)</label>
-              <Input placeholder="أدخل رمز المنتج" />
-            </div>
-
-            <div className="space-y-2">
               <label>الكمية المتاحة</label>
               <Input type="number" placeholder="أدخل الكمية" />
             </div>
@@ -100,7 +95,6 @@ export default function Products() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-xl font-semibold">{product.name}</h3>
-                <p className="text-gray-500">رمز المنتج: {product.sku}</p>
               </div>
               <div className="text-left">
                 <p className="text-xl font-bold">{product.price} ريال</p>

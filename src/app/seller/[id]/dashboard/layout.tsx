@@ -198,6 +198,9 @@ export default function DashboardLayout({
                                 variants={itemVariants}
                               >
                                 <Link
+                                  onClick={() => {
+                                    setIsMobileMenuOpen(false);
+                                  }}
                                   href={subItem.href}
                                   className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
                                     isSubActive
