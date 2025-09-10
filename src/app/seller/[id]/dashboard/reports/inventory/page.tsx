@@ -10,6 +10,8 @@ import {
   AlertTriangle,
   Archive,
   TrendingDown,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import Card, { CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -23,6 +25,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import { FaFilePdf } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -68,6 +86,10 @@ export default function InventoryReportsPage() {
     from: "",
     to: "",
   });
+
+  const [exportFormat, setExportFormat] = useState("");
+  const [exportTab, setExportTab] = useState("");
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const inventoryProducts: InventoryProduct[] = [
     {
@@ -135,45 +157,101 @@ export default function InventoryReportsPage() {
     >
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">تقارير المخزون</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
-            <Filter size={16} />
-          </Button>
-          <Button variant="outline" size="icon">
-            <Download size={16} />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsExportDialogOpen(true);
+          }}
+          className="flex items-center gap-2"
+        >
+          <Download size={16} />
+          تصدير التقرير
+        </Button>{" "}
+        <Dialog open={isExportDialogOpen} setOpen={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>تصدير التقرير</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>نوع التقرير</Label>
+                <Select value={exportTab} onValueChange={setExportTab}>
+                  <SelectItem value="inventory">حالة المخزون</SelectItem>
+                  <SelectItem value="low-stock">
+                    المنتجات منخفضة المخزون
+                  </SelectItem>
+                </Select>
+              </div>
+              <div>
+                <Label>تنسيق التصدير</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectItem value="pdf">
+                    <div className="flex items-center gap-2">
+                      <FaFilePdf size={16} />
+                      PDF
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="excel">
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet size={16} />
+                      Excel
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="csv">
+                    <div className="flex items-center gap-2">
+                      <FileText size={16} />
+                      CSV
+                    </div>
+                  </SelectItem>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>من تاريخ</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, from: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>إلى تاريخ</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, to: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <Button
+                className="w-full"
+                disabled={
+                  !exportFormat ||
+                  !exportTab ||
+                  !dateRange.from ||
+                  !dateRange.to
+                }
+                onClick={() => {
+                  // تنفيذ عملية التصدير
+                  console.log("تصدير التقرير...", {
+                    format: exportFormat,
+                    tab: exportTab,
+                    dateRange,
+                  });
+                  setIsExportDialogOpen(false);
+                }}
+              >
+                <Download className="w-4 h-4 ml-2" />
+                تصدير
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* فلتر التاريخ */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
-            <Label>من تاريخ</Label>
-            <Input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, from: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex-1">
-            <Label>إلى تاريخ</Label>
-            <Input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, to: e.target.value })
-              }
-            />
-          </div>
-          <Button className="flex items-center gap-2">
-            <Calendar size={16} />
-            تطبيق
-          </Button>
-        </div>
-      </motion.div>
 
       {/* إحصائيات المخزون */}
       <motion.div
@@ -229,74 +307,84 @@ export default function InventoryReportsPage() {
         </Card>
       </motion.div>
 
-      {/* حالة المخزون */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">حالة المخزون</h2>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>رمز المنتج</TableHead>
-              <TableHead>الكمية المتوفرة</TableHead>
-              <TableHead>الحد الأدنى</TableHead>
-              <TableHead>المستودع</TableHead>
-              <TableHead>آخر تحديث</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {inventoryProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell
-                  className={`font-semibold ${product.quantity < product.minQuantity ? "text-red-500" : "text-green-500"}`}
-                >
-                  {product.quantity}
-                </TableCell>
-                <TableCell>{product.minQuantity}</TableCell>
-                <TableCell>{product.warehouse}</TableCell>
-                <TableCell>{product.lastUpdated}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </motion.div>
+      <Tabs defaultValue="inventory" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="inventory" className="flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            حالة المخزون
+          </TabsTrigger>
+          <TabsTrigger value="low-stock" className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" />
+            المنتجات منخفضة المخزون
+          </TabsTrigger>
+        </TabsList>
 
-      {/* تنبيهات المخزون المنخفض */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingDown className="text-red-500" size={24} />
-          <h2 className="text-xl font-semibold">تنبيهات المخزون المنخفض</h2>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>رمز المنتج</TableHead>
-              <TableHead>الكمية المتوفرة</TableHead>
-              <TableHead>الحد الأدنى</TableHead>
-              <TableHead>الأيام المتبقية للنفاد</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {lowStockProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell className="text-red-500 font-semibold">
-                  {product.quantity}
-                </TableCell>
-                <TableCell>{product.minQuantity}</TableCell>
-                <TableCell
-                  className={`font-semibold ${product.daysUntilStockout <= 5 ? "text-red-500" : "text-yellow-500"}`}
-                >
-                  {product.daysUntilStockout} أيام
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </motion.div>
+        <TabsContent value="inventory">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6"
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>الكمية المتوفرة</TableHead>
+                  <TableHead>الحد الأدنى</TableHead>
+                  <TableHead>المستودع</TableHead>
+                  <TableHead>آخر تحديث</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {inventoryProducts.map((product, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell
+                      className={`font-semibold ${
+                        product.quantity < product.minQuantity
+                          ? "text-red-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {product.quantity}
+                    </TableCell>
+                    <TableCell>{product.minQuantity}</TableCell>
+                    <TableCell>{product.warehouse}</TableCell>
+                    <TableCell>{product.lastUpdated}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="low-stock">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6"
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>الكمية المتوفرة</TableHead>
+                  <TableHead>الحد الأدنى</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lowStockProducts.map((product, index) => (
+                  <TableRow key={index} className="text-right">
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell className="text-red-500 font-semibold">
+                      {product.quantity}
+                    </TableCell>
+                    <TableCell>{product.minQuantity}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 }

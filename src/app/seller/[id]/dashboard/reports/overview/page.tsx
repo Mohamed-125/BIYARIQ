@@ -11,6 +11,15 @@ import {
   ArrowDown,
 } from "lucide-react";
 import Card, { CardContent } from "@/components/ui/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -122,7 +131,100 @@ export default function ReportsOverviewPage() {
         ))}
       </div>
 
-      {/* يمكن إضافة المزيد من المكونات هنا مثل الرسوم البيانية والإحصائيات التفصيلية */}
+      <Tabs defaultValue="sales" className="w-full">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="sales">المبيعات</TabsTrigger>
+          <TabsTrigger value="products">المنتجات</TabsTrigger>
+          <TabsTrigger value="customers">العملاء</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="sales">
+          <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>المبيعات</TableHead>
+                  <TableHead>الإيرادات</TableHead>
+                  <TableHead>التغيير</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>منتج 1</TableCell>
+                  <TableCell>150</TableCell>
+                  <TableCell>4,500 ريال</TableCell>
+                  <TableCell className="text-green-600">+15%</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>منتج 2</TableCell>
+                  <TableCell>120</TableCell>
+                  <TableCell>3,600 ريال</TableCell>
+                  <TableCell className="text-red-600">-5%</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="products">
+          <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>المخزون</TableHead>
+                  <TableHead>التقييم</TableHead>
+                  <TableHead>الحالة</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>منتج 1</TableCell>
+                  <TableCell>50</TableCell>
+                  <TableCell>4.5</TableCell>
+                  <TableCell>نشط</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>منتج 2</TableCell>
+                  <TableCell>30</TableCell>
+                  <TableCell>4.2</TableCell>
+                  <TableCell>نشط</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="customers">
+          <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>العميل</TableHead>
+                  <TableHead>عدد الطلبات</TableHead>
+                  <TableHead>إجمالي المشتريات</TableHead>
+                  <TableHead>آخر طلب</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>عميل 1</TableCell>
+                  <TableCell>10</TableCell>
+                  <TableCell>3,000 ريال</TableCell>
+                  <TableCell>قبل يومين</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>عميل 2</TableCell>
+                  <TableCell>8</TableCell>
+                  <TableCell>2,400 ريال</TableCell>
+                  <TableCell>قبل 3 أيام</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 }

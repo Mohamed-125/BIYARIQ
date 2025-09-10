@@ -88,10 +88,6 @@ export const sidebarLinks = [
         href: "/seller/test-seller/dashboard/reports/customers",
         label: "العملاء",
       },
-      {
-        href: "/seller/test-seller/dashboard/reports/export",
-        label: "تصدير التقارير",
-      },
     ],
   },
   {

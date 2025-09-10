@@ -10,6 +10,8 @@ import {
   TrendingDown,
   Star,
   Package,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import Card, { CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -23,7 +25,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { h2 } from "framer-motion/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../../../../../../components/ui/Select";
+import { FaFilePdf } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -68,6 +85,10 @@ export default function ProductsReportsPage() {
     from: "",
     to: "",
   });
+
+  const [exportFormat, setExportFormat] = useState("");
+  const [exportTab, setExportTab] = useState("");
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const topProducts: ProductPerformance[] = [
     {
@@ -150,138 +171,208 @@ export default function ProductsReportsPage() {
     >
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">تقارير المنتجات</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
-            <Filter size={16} />
-          </Button>
-          <Button variant="outline" size="icon">
-            <Download size={16} />
-          </Button>
-        </div>
+        <Button
+          onClick={() => {
+            setIsExportDialogOpen(true);
+          }}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Download size={16} />
+          تصدير التقرير
+        </Button>{" "}
+        <Dialog open={isExportDialogOpen} setOpen={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>تصدير التقرير</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>نوع التقرير</Label>
+                <Select
+                  placeholder="اختر نوع التقرير"
+                  value={exportTab}
+                  onValueChange={setExportTab}
+                >
+                  <SelectItem value="top-products">
+                    المنتجات الأكثر مبيعاً
+                  </SelectItem>
+                  <SelectItem value="low-products">
+                    المنتجات الأقل مبيعاً
+                  </SelectItem>
+                  <SelectItem value="rated-products">
+                    المنتجات المقيمة
+                  </SelectItem>
+                </Select>
+              </div>
+              <div>
+                <Label>تنسيق التصدير</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectItem value="pdf">
+                    <div className="flex items-center gap-2">
+                      <FaFilePdf size={16} />
+                      PDF
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="excel">
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet size={16} />
+                      Excel
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="csv">
+                    <div className="flex items-center gap-2">
+                      <FileText size={16} />
+                      CSV
+                    </div>
+                  </SelectItem>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>من تاريخ</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, from: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>إلى تاريخ</Label>
+                  <Input
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, to: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <Button
+                className="w-full"
+                disabled={
+                  !exportFormat ||
+                  !exportTab ||
+                  !dateRange.from ||
+                  !dateRange.to
+                }
+                onClick={() => {
+                  // تنفيذ عملية التصدير
+                  console.log("تصدير التقرير...", {
+                    format: exportFormat,
+                    tab: exportTab,
+                    dateRange,
+                  });
+                  setIsExportDialogOpen(false);
+                }}
+              >
+                <Download className="w-4 h-4 ml-2" />
+                تصدير
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* فلتر التاريخ */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
-            <Label>من تاريخ</Label>
-            <Input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, from: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex-1">
-            <Label>إلى تاريخ</Label>
-            <Input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, to: e.target.value })
-              }
-            />
-          </div>
-          <Button className="flex items-center gap-2">
-            <Calendar size={16} />
-            تطبيق
-          </Button>
-        </div>
-      </motion.div>
+      <Tabs defaultValue="top-products" className="w-full">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="top-products">الأكثر مبيعاً</TabsTrigger>
+          <TabsTrigger value="low-products">الأقل مبيعاً</TabsTrigger>
+          <TabsTrigger value="rated-products">المنتجات المقيمة</TabsTrigger>
+        </TabsList>
 
-      {/* المنتجات الأكثر مبيعاً */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="text-green-500" size={24} />
-          <h2 className="text-xl font-semibold">المنتجات الأكثر مبيعاً</h2>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>المبيعات</TableHead>
-              <TableHead>الإيرادات</TableHead>
-              <TableHead>التقييم</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {topProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.sales}</TableCell>
-                <TableCell>{product.revenue} ريال</TableCell>
-                <TableCell className="flex items-center gap-1">
-                  <Star className="text-yellow-500" size={16} />
-                  {product.rating}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </motion.div>
+        <TabsContent value="top-products">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="text-green-500" size={24} />
+              <h2 className="text-xl font-semibold">المنتجات الأكثر مبيعاً</h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>عدد المبيعات</TableHead>
+                  <TableHead>إجمالي المبيعات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topProducts.map((product, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.sales}</TableCell>
+                    <TableCell>{product.revenue} ريال</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
 
-      {/* المنتجات منخفضة المبيعات */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingDown className="text-red-500" size={24} />
-          <h2 className="text-xl font-semibold">المنتجات منخفضة المبيعات</h2>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>المبيعات</TableHead>
-              <TableHead>الإيرادات</TableHead>
-              <TableHead>التقييم</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {lowPerformingProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.sales}</TableCell>
-                <TableCell>{product.revenue} ريال</TableCell>
-                <TableCell className="flex items-center gap-1">
-                  <Star className="text-yellow-500" size={16} />
-                  {product.rating}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </motion.div>
+        <TabsContent value="low-products">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingDown className="text-red-500" size={24} />
+              <h2 className="text-xl font-semibold">المنتجات الأقل مبيعاً</h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>عدد المبيعات</TableHead>
+                  <TableHead>إجمالي المبيعات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lowPerformingProducts.map((product, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.sales}</TableCell>
+                    <TableCell>{product.revenue} ريال</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
 
-      {/* المنتجات التي تم تقييمها */}
-      <motion.div variants={itemVariants} className="bg-white rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Star className="text-yellow-500" size={24} />
-          <h2 className="text-xl font-semibold">المنتجات التي تم تقييمها</h2>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>التقييم</TableHead>
-              <TableHead>عدد التقييمات</TableHead>
-              <TableHead>آخر تقييم</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ratedProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell className="flex items-center gap-1">
-                  <Star className="text-yellow-500" size={16} />
-                  {product.rating}
-                </TableCell>
-                <TableCell>{product.reviews}</TableCell>
-                <TableCell>{product.lastReview}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </motion.div>
+        <TabsContent value="rated-products">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="text-yellow-500" size={24} />
+              <h2 className="text-xl font-semibold">المنتجات المقيمة</h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>المنتج</TableHead>
+                  <TableHead>عدد التقييمات</TableHead>
+                  <TableHead>متوسط التقييم</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ratedProducts.map((product, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.reviews}</TableCell>
+                    <TableCell>{product.rating}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 }
