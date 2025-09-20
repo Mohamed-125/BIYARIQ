@@ -36,7 +36,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!authLoading) fetchFavorites();
-  }, [user, authLoading]);
+  }, [authLoading]);
 
   const fetchFavorites = async () => {
     try {
@@ -46,7 +46,6 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({
       if (user) {
         const response = await apiFetch("/favorites");
 
-        console.log("response", response);
         setFavorites(response.favorites.map((item: any) => item.product));
         setLoading(false);
       } else {

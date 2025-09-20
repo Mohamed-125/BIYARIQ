@@ -87,8 +87,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const [dummyProducts, setDummyProducts] = useState<Product[]>([]);
   useEffect(() => {
+
     if (!authLoading) fetchCartItems();
-  }, [user, authLoading]);
+  }, [authLoading]);
 
   const fetchCartItems = async () => {
     try {
