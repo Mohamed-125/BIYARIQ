@@ -9,6 +9,7 @@ import EmailLoginForm from "./components/EmailLoginForm";
 import VerificationCode from "./components/VerificationCode";
 import NewPasswordForm from "./components/NewPasswordForm";
 import { apiFetch } from "../../lib/apiFetch";
+import { Mail, Phone, KeyRound, Lock } from "lucide-react";
 
 interface LoginModalProps {
   open: boolean;
@@ -83,26 +84,30 @@ const LoginModal = ({ open, setOpen }: LoginModalProps) => {
               <h2 className="text-xl font-semibold text-center mb-6">
                 تسجيل الدخول
               </h2>
-              <div className="space-y-3">
+              <div className="flex flex-col md:flex-row gap-3">
                 <Button
                   variant="outline"
                   size="full"
+                  className="flex items-center gap-2 justify-center"
                   onClick={() => {
                     setLoginType("email");
                     setStep(2);
                   }}
                 >
+                  <Mail className="w-5 h-5" />
                   البريد الإلكتروني
                 </Button>
                 <Button
                   variant="outline"
                   size="full"
                   disabled
+                  className="flex items-center gap-2 justify-center"
                   onClick={() => {
                     setLoginType("phone");
                     setStep(2);
                   }}
                 >
+                  <Phone className="w-5 h-5" />
                   رقم الهاتف
                 </Button>
               </div>
@@ -115,27 +120,24 @@ const LoginModal = ({ open, setOpen }: LoginModalProps) => {
               <h2 className="text-xl font-semibold text-center mb-6">
                 اختر طريقة تسجيل الدخول
               </h2>
-              <div className="space-y-3">
+              <div className="flex flex-col md:flex-row gap-3">
                 <Button
                   variant="outline"
                   size="full"
+                  className="flex items-center gap-2 justify-center"
                   onClick={() => setEmailLoginType("password")}
                 >
+                  <Lock className="w-5 h-5" />
                   كلمة المرور
                 </Button>
                 <Button
                   variant="outline"
                   size="full"
+                  className="flex items-center gap-2 justify-center"
                   onClick={() => setEmailLoginType("code")}
                 >
+                  <KeyRound className="w-5 h-5" />
                   رمز التحقق
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="full"
-                  onClick={() => setEmailLoginType("reset")}
-                >
-                  نسيت كلمة المرور؟
                 </Button>
               </div>
             </div>
