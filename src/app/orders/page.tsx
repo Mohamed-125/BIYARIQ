@@ -35,7 +35,7 @@ const itemVariants = {
 };
 
 const OrdersPage = () => {
-  const { dummyProducts } = useCart();
+  const { dummyProducts  } = useCart();
   const [activeTab, setActiveTab] = useState<
     "all" | "physical" | "digital" | "course"
   >("all");

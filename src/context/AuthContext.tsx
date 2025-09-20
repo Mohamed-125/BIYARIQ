@@ -28,11 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     try {
       const response = await apiFetch("/auth/my-profile");
@@ -45,6 +40,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const syncLocalData = async () => {
     try {

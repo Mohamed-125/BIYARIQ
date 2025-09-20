@@ -60,6 +60,7 @@ interface CartContextType {
   clearCart: () => Promise<void>;
   isInCart: (id: string) => boolean;
   getCartItemById: (id: string) => CartItem | undefined;
+  dummyProducts: [];
 }
 
 const CartContext = createContext<CartContextType>({
@@ -72,6 +73,7 @@ const CartContext = createContext<CartContextType>({
   clearCart: async () => {},
   isInCart: () => false,
   getCartItemById: () => undefined,
+  dummyProducts: [],
 });
 
 export const useCart = () => useContext(CartContext);
@@ -83,7 +85,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [dummyProducts, setDummyProducts] = useState<Product[]>([]);
   useEffect(() => {
     if (!authLoading) fetchCartItems();
   }, [user, authLoading]);
@@ -168,7 +170,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       toast.success("تم إزالة المنتج من السلة");
     } catch (err) {
       // Revert optimistic update
-      setCartItems(previousItems);
       toast.error("فشل إزالة المنتج من السلة");
     }
   };
@@ -201,7 +202,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       toast.success("تم تحديث الكمية");
     } catch (err) {
       // Revert optimistic update
-      setCartItems(previousItems);
       toast.error("فشل تحديث الكمية");
     }
   };
@@ -221,7 +221,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       toast.success("تم مسح سلة التسوق");
     } catch (err) {
       // Revert optimistic update
-      setCartItems(previousItems);
       toast.error("فشل مسح سلة التسوق");
     }
   };
@@ -246,6 +245,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         clearCart,
         isInCart,
         getCartItemById,
+        dummyProducts,
       }}
     >
       {children}

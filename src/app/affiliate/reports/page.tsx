@@ -52,45 +52,45 @@ const countryData = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export default function ReportsPage() {
-  const exportReport = async () => {
-    try {
-      const response = await fetch("/api/affiliate/reports/export", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "all",
-          dateRange: {
-            start: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-            end: new Date(),
-          },
-        }),
-      });
+  // const exportReport = async () => {
+  //   try {
+  //     const response = await fetch("/api/affiliate/reports/export", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         type: "all",
+  //         dateRange: {
+  //           start: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+  //           end: new Date(),
+  //         },
+  //       }),
+  //     });
 
-      if (!response.ok) {
-        throw new Error("فشل تصدير التقرير");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("فشل تصدير التقرير");
+  //     }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `تقرير_المسوق_${new Date().toLocaleDateString("ar-EG")}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("خطأ في تصدير التقرير:", error);
-    }
-  };
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = `تقرير_المسوق_${new Date().toLocaleDateString("ar-EG")}.xlsx`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
+  //     document.body.removeChild(a);
+  //   } catch (error) {
+  //     console.error("خطأ في تصدير التقرير:", error);
+  //   }
+  // };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">التقارير</h1>
-        <Button variant="outline" onClick={exportReport}>
+        <Button variant="outline" >
           <Download className="w-4 h-4 ml-2" />
           تصدير التقارير
         </Button>

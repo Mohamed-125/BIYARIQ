@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import { apiFetch } from "../../lib/apiFetch";
 import { useInView } from "react-intersection-observer";
 import Loading from "../../components/ui/Loading";
+import { Suspense } from "react";
 
 interface LocalizedText {
   ar: string;
@@ -39,7 +40,7 @@ interface PaginationData {
   totalPages: number;
 }
 
-const ProductsPage = () => {
+const ProductsPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
@@ -304,6 +305,14 @@ const ProductsPage = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const ProductsPage = () => {
+  return (
+    <Suspense fallback={<div>جاري التحميل...</div>}>
+      <ProductsPageContent />
+    </Suspense>
   );
 };
 

@@ -30,7 +30,7 @@ export default function AffiliateLinks() {
   const [showQR, setShowQR] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState<number | null>(null);
   const [copySuccess, setCopySuccess] = useState<number | null>(null);
-  const [links, setLinks] = useState(marketingLinks);
+  const [links, setLinks] = useState([]);
 
   const handleDelete = async (linkId: number) => {
     try {
