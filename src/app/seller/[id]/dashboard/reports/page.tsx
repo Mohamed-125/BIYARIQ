@@ -160,7 +160,7 @@
 //       {/* رأس الصفحة */}
 //       <div className="flex justify-between items-center">
 //         <h1 className="text-2xl font-bold">إدارة التقارير</h1>
-//         <Dialog open={isCreateReportOpen} onOpenChange={setIsCreateReportOpen}>
+//         <Dialog open={isCreateReportOpen} setOpen={setIsCreateReportOpen}>
 //           <DialogTrigger asChild>
 //             <Button className="flex items-center gap-2">
 //               <Plus size={16} />

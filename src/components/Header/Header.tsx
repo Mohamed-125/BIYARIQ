@@ -40,8 +40,9 @@ import {
   DropdownSeparator,
 } from "@/components/ui/Dropdown";
 import { useAuth, UserType } from "@/context/AuthContext";
-import { Search } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { div } from "framer-motion/client";
 
 const headerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -240,9 +241,9 @@ export default function Navbar() {
               {darkMode ? <FiSun /> : <FiMoon />}
             </button>
 
-            {/* Wishlist - يظهر فقط من md وفوق */}
-            <div className="hidden md:flex text-xl">
-              <Link href={"/wishlist"}>
+            {/* Favoritest - يظهر فقط من md وفوق */}
+            <div className="flex text-xl">
+              <Link href={"/favorites"}>
                 <FiHeart className="cursor-pointer hover:text-purple-600 transition-colors" />
               </Link>
             </div>
@@ -254,12 +255,21 @@ export default function Navbar() {
 
             {/* User / Login */}
             {user ? (
-              <UserDropdown
-                dropdownOpen={dropdownOpen}
-                setDropdownOpen={setDropdownOpen}
-                user={user}
-                logout={logout}
-              />
+                 <>
+                <Button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="hidden md:block"
+                >
+                  تسجيل الدخول
+                </Button>
+                <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />
+              </>
+              // <UserDropdown
+              //   dropdownOpen={dropdownOpen}
+              //   setDropdownOpen={setDropdownOpen}
+              //   user={user}
+              //   logout={logout}
+              // />
             ) : (
               <>
                 <Button
@@ -287,6 +297,15 @@ export default function Navbar() {
         </div>
         <div className="p-4">
           <RecursiveMenu items={menuData} toggleSidebar={toggleSidebar} />
+          <button
+            onClick={toggleDarkMode}
+            className="flex text-xl my-3 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            {darkMode ? <FiSun /> : <FiMoon />}
+          </button>
+          <Button size={"full"} onClick={() => setLoginModalOpen(true)}>
+            تسجيل الدخول
+          </Button>
         </div>
       </div>
 
@@ -322,7 +341,7 @@ const UserDropdown = ({
       whileTap={{ scale: 0.95 }}
       className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-medium cursor-pointer"
     >
-      {user?.firstName?.[0]?.toUpperCase()}
+      <User />
     </motion.div>
   );
   return (
@@ -334,9 +353,6 @@ const UserDropdown = ({
     >
       <DropdownSection>
         <div className="px-4 py-3">
-          <p className=" font-medium  text-gray-900">
-            {user.firstName} {user.lastName}
-          </p>
           <p className=" text-gray-500">{user.email}</p>
         </div>
       </DropdownSection>
@@ -351,7 +367,7 @@ const UserDropdown = ({
               </Link>
             </DropdownItem>
             <DropdownItem>
-              <Link href="/wishlist" className="flex items-center gap-2">
+              <Link href="/favorites" className="flex items-center gap-2">
                 <FiHeart className="w-4 h-4" />
                 <span>قائمة الرغبات</span>
               </Link>

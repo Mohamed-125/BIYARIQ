@@ -1,23 +1,40 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Search, X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/Dialog";
-import Link from "next/link";
-import Input from "@/components/ui/Input";
-interface SearchResult {
+import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/apiFetch";
+import Image from "next/image";
+import { useInView } from "react-intersection-observer";
+
+interface LocalizedText {
+  ar: string;
+  en: string;
+}
+
+interface Product {
   id: string;
-  name: string;
-  type: string;
-  category?: string;
-  price?: number;
-  url: string;
+  name: LocalizedText;
+  description: LocalizedText;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  image: string;
+  type: "physical" | "digital" | "course";
+  category?: {
+    name: LocalizedText;
+  };
+  rating?: number;
+  ratingCount?: number;
+  stock?: number;
+}
+
+interface PaginationData {
+  currentPage: number;
+  limit: number;
+  totalProducts: number;
+  totalPages: number;
 }
 
 interface SearchModalProps {
@@ -25,148 +42,211 @@ interface SearchModalProps {
   setOpen: (open: boolean) => void;
 }
 
-const mockResults: SearchResult[] = [
-  {
-    id: "1",
-    name: "سماعات بلوتوث لاسلكية",
-    type: "منتج فعلي",
-    category: "إلكترونيات",
-    price: 199,
-    url: "/products/1",
-  },
-  {
-    id: "2",
-    name: "كتاب تعلم البرمجة بلغة جافاسكريبت",
-    type: "منتج رقمي",
-    category: "كتب",
-    price: 79,
-    url: "/products/2",
-  },
-  {
-    id: "3",
-    name: "دورة تطوير تطبيقات الويب",
-    type: "دورة تدريبية",
-    category: "برمجة",
-    price: 299,
-    url: "/courses/3",
-  },
-];
+const SearchModal = ({ open, setOpen }: SearchModalProps) => {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationData>({
+    currentPage: 1,
+    limit: 20,
+    totalProducts: 0,
+    totalPages: 1,
+  });
+  const [hasMore, setHasMore] = useState(true);
+  const { ref, inView } = useInView();
 
-const SearchModal: React.FC<SearchModalProps> = ({ open, setOpen }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    if (searchQuery.length > 2) {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        const filteredResults = mockResults.filter((item) =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setResults(filteredResults);
-        setIsLoading(false);
-      }, 500);
-    } else {
-      setResults([]);
+  const fetchResults = async (page = 1, isNewSearch = false) => {
+    if (!query.trim()) {
+      setProducts([]);
+      setHasMore(false);
+      return;
     }
-  }, [searchQuery]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Additional search logic if needed
+    try {
+      if (isNewSearch) {
+        setLoading(true);
+      }
+      setError(null);
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      const data = await apiFetch(
+        `/products?search=${encodeURIComponent(query)}&page=${page}`,
+        {
+          signal: abortControllerRef.current.signal,
+          cache: "no-store",
+        }
+      );
+
+      setPagination(data.paginate);
+      setHasMore(page < data.paginate.totalPages);
+
+      if (isNewSearch) {
+        setProducts(data.products);
+      } else {
+        setProducts((prev) => [...prev, ...data.products]);
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
+      setError(err instanceof Error ? err.message : "حدث خطأ ما");
+      if (isNewSearch) setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearSearch = () => {
-    setSearchQuery("");
-    setResults([]);
+  const handleSearch = () => {
+    if (query.trim()) {
+      fetchResults(1, true);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      fetchResults(pagination.currentPage + 1);
+    }
+  }, [inView, hasMore, loading]);
+
+  const handleViewAll = () => {
+    if (query.trim()) {
+      router.push(`/products?search=${encodeURIComponent(query)}`);
+      setOpen(false);
+    }
+  };
+
+  const handleProductClick = (id: string) => {
+    router.push(`/products/${id}`);
+    setOpen(false);
   };
 
   return (
     <Dialog open={open} setOpen={setOpen}>
-      <DialogContent className="max-w-2xl w-full p-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle className="text-center">البحث في المتجر</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-3xl h-[80vh] overflow-hidden flex flex-col">
+        <div className="flex items-center gap-2 p-4 border-b">
+          <button
+            onClick={handleSearch}
+            className="p-1 hover:bg-gray-100 rounded-full"
+          >
+            <Search className="w-5 h-5 text-gray-400" />
+          </button>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="ابحث عن المنتجات..."
+            className="flex-1 outline-none text-lg"
+            autoFocus
+          />
+          {query && (
+            <button
+              onClick={() => {
+                setQuery("");
+                setProducts([]);
+              }}
+              className="p-1 hover:bg-gray-100 rounded-full"
+            >
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
+          )}
+        </div>
 
-        <div className="p-4">
-          <form onSubmit={handleSearch} className="relative">
-            <div className="relative flex items-center">
-              <Search className="absolute right-3 text-gray-400" size={20} />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن المنتجات، الدورات، والمزيد..."
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-                autoFocus
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute left-3 text-gray-400 hover:text-gray-600"
+        <div className="flex-1 overflow-y-auto">
+          {/* حالة التحميل */}
+          {loading && products.length === 0 && (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+          )}
+
+          {/* حالة الخطأ */}
+          {error && (
+            <div className="text-center text-red-500 p-4">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {/* حالة عدم وجود نتائج */}
+          {!loading && !error && query && products.length === 0 && (
+            <div className="text-center text-gray-500 p-4">
+              لا توجد نتائج مطابقة لبحثك
+            </div>
+          )}
+
+          {/* عرض النتائج */}
+          {products.length > 0 && (
+            <div className="divide-y">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="p-4 hover:bg-gray-50 cursor-pointer flex items-center gap-4"
+                  onClick={() => handleProductClick(product.id)}
                 >
-                  <X size={18} />
-                </button>
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
+                    <Image
+                      src={product.image}
+                      alt={product.name.ar}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{product.name.ar}</h3>
+                    <p className="text-gray-600 text-sm line-clamp-1">
+                      {product.description.ar}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="font-semibold text-purple-600">
+                        {product.price} ريال
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-sm text-gray-500 line-through">
+                          {product.originalPrice} ريال
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Infinite Scroll Trigger */}
+          {hasMore && (
+            <div ref={ref} className="h-10 w-full">
+              {loading && (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+                </div>
               )}
             </div>
-          </form>
-
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-              </div>
-            ) : results.length > 0 ? (
-              <div className="space-y-2">
-                {results.map((result) => (
-                  <Link
-                    href={result.url}
-                    key={result.id}
-                    onClick={() => setOpen(false)}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-600 text-xs rounded-full">
-                            {result.type}
-                          </span>
-                          {result.price && (
-                            <span className="font-semibold text-purple-600">
-                              {result.price} ريال
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="font-medium text-right">
-                          {result.name}
-                        </h3>
-                      </div>
-                      {result.category && (
-                        <p className="text-gray-500 text-sm text-right mt-1">
-                          {result.category}
-                        </p>
-                      )}
-                    </motion.div>
-                  </Link>
-                ))}
-              </div>
-            ) : searchQuery.length > 2 ? (
-              <div className="text-center py-8 text-gray-500">
-                لم يتم العثور على نتائج لـ "{searchQuery}"
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                ابدأ الكتابة للبحث عن المنتجات والدورات
-              </div>
-            )}
-          </div>
+          )}
         </div>
+
+        {/* زر عرض كل النتائج */}
+        {products.length > 0 && (
+          <div className="p-4 border-t">
+            <button
+              onClick={handleViewAll}
+              className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              عرض كل النتائج
+            </button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

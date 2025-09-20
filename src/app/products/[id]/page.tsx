@@ -1,195 +1,221 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Star,
-  Share2,
-  Heart,
-  ThumbsUp,
-  ThumbsDown,
-  Facebook,
-  Twitter,
-  WhatsApp,
-  Link,
-  X,
-} from "lucide-react";
+import { Heart, Share2 } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Thumbs } from "swiper/modules";
-import { Metadata } from "next";
-import Head from "next/head";
+import { useParams } from "next/navigation";
+import { apiFetch } from "@/lib/apiFetch";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import Rating from "@/components/ui/Rating";
+import { SharePopup } from "@/components/SharePopup";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
-import { Product } from "@/context/CartContext";
-import { FaFacebook, FaWhatsapp } from "react-icons/fa";
-import { Dialog } from "@/components/ui/modal";
-import { SharePopup } from "@/components/SharePopup";
-import { div } from "framer-motion/client";
-import Rating from "@/components/ui/Rating";
 
-// Define interfaces
-interface Review {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  likes: number;
-  dislikes: number;
+interface LocalizedText {
+  ar: string;
+  en: string;
 }
 
-interface Store {
-  id: string;
-  name: string;
-  avatar: string;
-  description: string;
-  rating: number;
-  totalSales: number;
-  joinedDate: string;
-  responseTime: string;
-  details: string;
+interface ProductImage {
+  url: string;
+  public_id: string;
+  _id: string;
 }
 
-const dummyStore: Store = {
-  id: "1",
-  name: "متجر التقنية المتقدمة",
-  avatar: "https://i.pravatar.cc/150?img=3",
-  description: "متخصصون في بيع تراخيص البرامج الأصلية وحلول الأمن الرقمي",
-  rating: 4.8,
-  totalSales: 1234,
-  joinedDate: "2023-01-15",
-  responseTime: "خلال ساعة",
-  details: `
-    <div class="space-y-6">
-      <h3 class="text-xl font-bold">عن المتجر</h3>
-      <p>نحن متجر متخصص في توفير حلول البرمجيات الأصلية وتراخيص الأنظمة. نعمل مع كبرى الشركات العالمية لضمان جودة منتجاتنا.</p>
-      
-      <h3 class="text-xl font-bold">خدماتنا</h3>
-      <ul class="list-disc list-inside space-y-2">
-        <li>توفير تراخيص برمجيات أصلية</li>
-        <li>دعم فني على مدار الساعة</li>
-        <li>ضمان استرداد الأموال</li>
-        <li>خدمة ما بعد البيع</li>
-      </ul>
-
-      <h3 class="text-xl font-bold">سياسة الضمان</h3>
-      <p>نقدم ضمان استرداد كامل للمبلغ خلال 30 يوماً من تاريخ الشراء في حال وجود أي مشكلة في المنتج.</p>
-    </div>
-  `,
-};
-
-const dummyProduct: Product = {
-  id: "1",
-  name: "ترخيص ويندوز 10",
-  price: 99.99,
-  originalPrice: 149.99,
-  image:
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIDfSFemHF1vxdjs0p7jclNlu0sabq9Izy0Q&s",
-  rating: 4.5,
-  type: "digital",
-  fileSize: "4.3GB",
-  format: "ISO",
-  downloadLink: "#",
-  licenseKey: "XXXXX-XXXXX-XXXXX-XXXXX",
-  variants: [
-    { name: "الإصدار", options: ["Home", "Pro", "Enterprise"] },
-    { name: "نوع الترخيص", options: ["شخصي", "تجاري", "تعليمي"] },
-  ],
-  details: `
-    <div class="space-y-6">
-      <h3 class="text-xl font-bold">المواصفات</h3>
-      <ul class="list-disc list-inside space-y-2">
-        <li><strong>المعالج:</strong> 1 gigahertz (GHz) or faster</li>
-        <li><strong>الذاكرة:</strong> 1 GB for 32-bit or 2 GB for 64-bit</li>
-        <li><strong>مساحة القرص:</strong> 16 GB for 32-bit OS or 20 GB for 64-bit OS</li>
-        <li><strong>كرت الشاشة:</strong> DirectX 9 or later with WDDM 1.0 driver</li>
-      </ul>
-
-      <h3 class="text-xl font-bold">الوصف</h3>
-      <p>ترخيص ويندوز 10 الأصلي من مايكروسوفت. يتضمن جميع الميزات الأساسية والتحديثات المجانية.</p>
-
-      <h3 class="text-xl font-bold">المميزات</h3>
-      <ul class="list-disc list-inside space-y-2">
-        <li>تحديثات مجانية مدى الحياة</li>
-        <li>دعم فني 24/7</li>
-        <li>تفعيل فوري</li>
-        <li>ضمان استرداد الأموال</li>
-      </ul>
-
-      <h3 class="text-xl font-bold">طريقة التفعيل</h3>
-      <ol class="list-decimal list-inside space-y-2">
-        <li>قم بتحميل النسخة من الرابط المرفق</li>
-        <li>ثبت النظام على جهازك</li>
-        <li>استخدم مفتاح الترخيص المرفق للتفعيل</li>
-        <li>استمتع بنظام تشغيل أصلي</li>
-      </ol>
-    </div>
-  `,
-};
-
-const dummyImages = [
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIDfSFemHF1vxdjs0p7jclNlu0sabq9Izy0Q&s",
-  "https://images.unsplash.com/photo-1420593248178-d88870618ca0?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bmF0dXJhbHxlbnwwfHwwfHx8MA%3D%3D",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Altja_j%C3%B5gi_Lahemaal.jpg/1200px-Altja_j%C3%B5gi_Lahemaal.jpg",
-];
-
-const dummyReviews: Review[] = [
-  {
-    id: "1",
-    userId: "user1",
-    userName: "محمد أحمد",
-    userAvatar: "https://i.pravatar.cc/150?img=1",
-    rating: 5,
-    comment: "منتج رائع وسهل الاستخدام. التنصيب كان سلس جداً.",
-    createdAt: "2024-02-15",
-    likes: 12,
-    dislikes: 2,
-  },
-  {
-    id: "2",
-    userId: "user2",
-    userName: "سارة محمد",
-    userAvatar: "https://i.pravatar.cc/150?img=2",
-    rating: 4,
-    comment: "جيد جداً ولكن كان هناك بعض التأخير في استلام مفتاح الترخيص.",
-    createdAt: "2024-02-14",
-    likes: 8,
-    dislikes: 1,
-  },
-];
+interface Product {
+  id: string;
+  name: LocalizedText;
+  description: LocalizedText;
+  price: number;
+  priceAfterDiscount?: number;
+  thumbnail: { url: string; public_id: string };
+  images: ProductImage[];
+  type: "physical" | "digital" | "course";
+  category?: {
+    name: LocalizedText;
+  };
+  subcategory?: {
+    name: LocalizedText;
+  };
+  ratingAverage?: number;
+  ratingQuantity?: number;
+  stock?: number;
+  colors?: string[];
+  size?: string[];
+  vendor?: {
+    username: string;
+    role: string;
+    photo?: string | null;
+  };
+}
 
 export default function ProductDetails() {
-  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
-  const [showSharePopup, setShowSharePopup] = useState(false);
-  const [selectedVariants, setSelectedVariants] = useState<
-    Record<string, string>
-  >({});
-  const [hasUserPurchased, setHasUserPurchased] = useState(false);
+  const { id } = useParams();
+  const { user } = useAuth();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const shareUrl = "";
+  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
+  const [isInCart, setIsInCart] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showSharePopup, setShowSharePopup] = useState(false);
+
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    fetchProduct();
+    checkCartStatus();
+    checkFavoriteStatus();
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const { product } = await apiFetch(`/products/${id}`);
+      setProduct(product);
+
+      if (product.colors?.length) setSelectedColor(product.colors[0]);
+      if (product.size?.length) setSelectedSize(product.size[0]);
+    } catch (err) {
+      setError("فشل تحميل المنتج");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkCartStatus = async () => {
+    try {
+      if (user) {
+        const response = await apiFetch("/cart");
+        setIsInCart(response.items.some((item: any) => item.product.id === id));
+      } else {
+        const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        setIsInCart(localCart.some((item: any) => item.productId === id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const checkFavoriteStatus = async () => {
+    try {
+      if (user) {
+        const response = await apiFetch("/favorites");
+        setIsFavorite(
+          response.favorites.some((item: any) => item.product.id === id)
+        );
+      } else {
+        const localFavorites = JSON.parse(
+          localStorage.getItem("favorites") || "[]"
+        );
+        setIsFavorite(localFavorites.includes(id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      if (user) {
+        await apiFetch("/cart", {
+          method: "POST",
+          body: JSON.stringify({
+            productId: id,
+            quantity,
+            color: selectedColor,
+            size: selectedSize,
+          }),
+        });
+      } else {
+        const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        if (!localCart.some((item: any) => item.productId === id)) {
+          localCart.push({
+            productId: id,
+            quantity,
+            color: selectedColor,
+            size: selectedSize,
+          });
+          localStorage.setItem("cart", JSON.stringify(localCart));
+        }
+      }
+      setIsInCart(true);
+      toast.success("تمت الإضافة إلى السلة");
+    } catch {
+      toast.error("فشل إضافة المنتج إلى السلة");
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      if (user) {
+        if (isFavorite) {
+          await apiFetch(`/favorites/${id}`, { method: "DELETE" });
+        } else {
+          await apiFetch("/favorites", {
+            method: "POST",
+            body: JSON.stringify({ productId: id }),
+          });
+        }
+      } else {
+        const localFavorites = JSON.parse(
+          localStorage.getItem("favorites") || "[]"
+        );
+        if (isFavorite) {
+          const updated = localFavorites.filter(
+            (favId: string) => favId !== id
+          );
+          localStorage.setItem("favorites", JSON.stringify(updated));
+        } else {
+          if (!localFavorites.includes(id)) {
+            localFavorites.push(id);
+            localStorage.setItem("favorites", JSON.stringify(localFavorites));
+          }
+        }
+      }
+      setIsFavorite(!isFavorite);
+    } catch {
+      toast.error("فشل تحديث المفضلة");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="text-center text-red-500 py-8">{error || "خطأ"}</div>
+    );
+  }
+
+  const discount =
+    product.priceAfterDiscount && product.price
+      ? Math.round(
+          ((product.price - product.priceAfterDiscount) / product.price) * 100
+        )
+      : 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Head>
-        <title>{dummyProduct.name}</title>
-        <meta
-          name="description"
-          content="اشترِ ترخيص ويندوز 10 الأصلي بأفضل سعر مع ضمان استرداد الأموال"
-        />
-      </Head>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Product Images */}
+        {/* Images */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
           className="space-y-4"
         >
           <Swiper
@@ -199,15 +225,13 @@ export default function ProductDetails() {
             modules={[Navigation, Pagination, Thumbs]}
             className="aspect-square rounded-2xl overflow-hidden bg-gray-100"
           >
-            {dummyImages.map((image, index) => (
+            {[product.thumbnail, ...product.images].map((image, index) => (
               <SwiperSlide key={index}>
-                <div className="relative w-full h-full">
-                  <img
-                    src={image}
-                    alt={`${dummyProduct.name} - ${index + 1}`}
-                    className=" w-full h-full object-cover"
-                  />
-                </div>
+                <img
+                  src={typeof image === "string" ? image : image.url}
+                  alt={product.name.ar}
+                  className="w-full h-full object-cover"
+                />
               </SwiperSlide>
             ))}
           </Swiper>
@@ -217,46 +241,46 @@ export default function ProductDetails() {
             spaceBetween={0}
             slidesPerView={4}
             width={350}
-            // freeMode
             watchSlidesProgress
             modules={[Navigation, Thumbs]}
             className="thumbs-swiper"
           >
-            {dummyImages.map((image, index) => (
+            {[product.thumbnail, ...product.images].map((image, index) => (
               <SwiperSlide key={index} className="!h-fit">
                 <img
-                  src={image}
-                  alt={`Thumbnail ${index + 1}`}
-                  className=" object-cover cursor-pointer w-[75px] rounded-xl aspect-square"
+                  src={typeof image === "string" ? image : image.url}
+                  alt={`thumb-${index}`}
+                  className="object-cover cursor-pointer w-[75px] rounded-xl aspect-square"
                 />
               </SwiperSlide>
             ))}
           </Swiper>
         </motion.div>
 
-        {/* Product Info */}
+        {/* Info */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-6 mt-0 lg:mt-10"
         >
           <div className="flex justify-between items-start">
             <h1 className="text-3xl font-bold text-gray-900">
-              {dummyProduct.name}
+              {product.name.ar}
             </h1>
             <div className="flex gap-3">
               <button
-                onClick={() => setIsLiked(!isLiked)}
-                className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${
-                  isLiked ? "text-red-500" : "bg-gray-50 text-gray-500"
-                }`}
+                onClick={handleToggleFavorite}
+                className={`p-2 rounded-full ${
+                  isFavorite
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 text-gray-600"
+                } hover:scale-110 transition-all`}
               >
-                <Heart className={isLiked ? "fill-current" : ""} />
+                <Heart size={24} className={isFavorite ? "fill-current" : ""} />
               </button>
               <button
                 onClick={() => setShowSharePopup(true)}
-                className="p-2 rounded-full bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100"
+                className="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100"
               >
                 <Share2 />
               </button>
@@ -264,245 +288,129 @@ export default function ProductDetails() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center">
-              {<Rating rating={dummyProduct.rating} />}
-            </div>
-            <span className="text-gray-500">({dummyProduct.rating} تقييم)</span>
+            <Rating rating={product.ratingAverage || 0} />
+            <span className="text-gray-500">
+              ({product.ratingQuantity || 0} تقييم)
+            </span>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
               <span className="text-3xl font-bold text-[#7b2cbf]">
-                {dummyProduct.price} ﷼
+                {product.priceAfterDiscount || product.price} ﷼
               </span>
-              {dummyProduct.originalPrice && (
+              {discount > 0 && (
                 <span className="text-lg text-gray-500 line-through">
-                  {dummyProduct.originalPrice} ﷼
+                  {product.price} ﷼
                 </span>
               )}
             </div>
-            <span className="inline-block bg-green-100 text-green-800 text-sm px-2 py-1 rounded">
-              خصم 33%
-            </span>
+            {discount > 0 && (
+              <span className="inline-block bg-green-100 text-green-800 text-sm px-2 py-1 rounded">
+                خصم {discount}%
+              </span>
+            )}
           </div>
 
-          <div className="space-y-4 py-6 border-y border-gray-200">
-            <div className="flex items-center gap-2 text-gray-600">
-              <span className="font-medium">حجم الملف:</span>
-              <span>{(dummyProduct as any).fileSize}</span>
+          {/* Colors */}
+          {product.colors?.length > 0 && (
+            <div className="space-y-2">
+              <label className="font-medium">الألوان:</label>
+              <div className="flex gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      selectedColor === color
+                        ? "border-purple-500"
+                        : "border-gray-200"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <span className="font-medium">الصيغة:</span>
-              <span>{(dummyProduct as any).format}</span>
-            </div>
+          )}
 
-            {/* Variants */}
-            {(dummyProduct as any).variants &&
-              (dummyProduct as any).variants.map(
-                (variant: any, index: number) => (
-                  <div key={index} className="mt-4">
-                    <span className="font-medium text-gray-600">
-                      {variant.name}:
-                    </span>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {variant.options.map(
-                        (option: string, optionIndex: number) => (
-                          <button
-                            key={optionIndex}
-                            onClick={() =>
-                              setSelectedVariants((prev) => ({
-                                ...prev,
-                                [variant.name]: option,
-                              }))
-                            }
-                            className={`px-4 py-2 rounded-lg border ${
-                              selectedVariants[variant.name] === option
-                                ? "border-[#7b2cbf] bg-purple-50 text-[#7b2cbf]"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                          >
-                            {option}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )
-              )}
+          {/* Sizes */}
+          {product.size?.length > 0 && (
+            <div className="space-y-2">
+              <label className="font-medium">المقاسات:</label>
+              <div className="flex gap-2">
+                {product.size.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-4 py-2 rounded-lg border ${
+                      selectedSize === size
+                        ? "border-purple-500 bg-purple-50"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quantity */}
+          <div className="space-y-2 py-4 border-y border-gray-200">
+            <label className="font-medium text-gray-600">الكمية</label>
+            <div className="flex items-center gap">
+              <button
+                onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-purple-500 text-lg font-bold"
+              >
+                -
+              </button>
+              <span className="text-xl font-semibold w-12 text-center">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity((prev) => prev + 1)}
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:border-purple-500 text-lg font-bold"
+              >
+                +
+              </button>
+            </div>
           </div>
 
-          <button className="w-full py-4 px-6 bg-[#7b2cbf] text-white rounded-lg font-medium hover:bg-[#6a24a6] transition-colors">
-            إضافة إلى السلة
+          <button
+            onClick={handleAddToCart}
+            disabled={isInCart || (product.stock || 0) === 0}
+            className={`w-full py-4 px-6 rounded-lg font-medium transition-colors ${
+              isInCart
+                ? "bg-green-500 text-white"
+                : "bg-[#7b2cbf] text-white hover:bg-[#6a24a6]"
+            } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+          >
+            {isInCart ? "تمت الإضافة للسلة" : "إضافة إلى السلة"}
           </button>
         </motion.div>
       </div>
 
-      {/* Store Information */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-xl p-6 shadow-sm mt-9 lg:mt-28"
-      >
+      {/* Vendor Section */}
+      <div className="bg-white rounded-xl p-6 shadow-sm mt-8">
         <div className="flex items-center gap-4">
           <img
-            src={dummyStore.avatar}
-            alt={dummyStore.name}
-            className="w-16 h-16 rounded-full"
+            src={product.vendor?.photo || "/default-avatar.png"}
+            alt={product.vendor?.username}
+            className="w-16 h-16 rounded-full object-cover border"
           />
           <div>
             <h2 className="text-xl font-bold text-gray-900">
-              {dummyStore.name}
+              {product.vendor?.username}
             </h2>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex">
-                {<Rating rating={dummyStore.rating} />}
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              {dummyStore.description}
+            <p className="text-lg text-gray-600 mt-1">
+              {product.vendor?.role === "admin" ? "متجر موثق ✅" : "بائع"}
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="font-bold text-[#7b2cbf]">
-              {dummyStore.totalSales}+
-            </div>
-            <div className="text-sm text-gray-600">مبيعات</div>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="font-bold text-[#7b2cbf]">
-              {dummyStore.responseTime}
-            </div>
-            <div className="text-sm text-gray-600">وقت الرد</div>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="font-bold text-[#7b2cbf]">
-              {new Date(dummyStore.joinedDate).getFullYear()}
-            </div>
-            <div className="text-sm text-gray-600">عضو منذ</div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Product Details */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-xl p-6 shadow-sm mb-8"
-      >
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">تفاصيل المنتج</h2>
-        <div dangerouslySetInnerHTML={{ __html: dummyProduct.details }} />
-      </motion.div>
-
+      </div>
       {/* Share Popup */}
       <SharePopup open={showSharePopup} setOpen={setShowSharePopup} />
-
-      {/* Reviews Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="mt-12"
-      >
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">
-          تقييمات المنتج
-        </h2>
-
-        {/* Add Review Section */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-          {hasUserPurchased ? (
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">أضف تقييمك</h3>
-              <div className="flex items-center gap-2">
-                <span>التقييم:</span>
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      className={`text-2xl ${
-                        star <= 5 ? "text-yellow-400" : "text-gray-300"
-                      }`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block mb-2">التعليق:</label>
-                <textarea
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#7b2cbf]"
-                  rows={4}
-                  placeholder="اكتب تعليقك هنا..."
-                />
-              </div>
-              <button className="px-6 py-2 bg-[#7b2cbf] text-white rounded-lg hover:bg-[#6a24a6] transition-colors">
-                إرسال التقييم
-              </button>
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-gray-600">
-                يجب عليك شراء المنتج أولاً لتتمكن من إضافة تقييم
-              </p>
-              <button className="mt-4 px-6 py-2 bg-[#7b2cbf] text-white rounded-lg hover:bg-[#6a24a6] transition-colors">
-                اشتري الآن للتقييم
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-8">
-          {dummyReviews.map((review) => (
-            <motion.div
-              key={review.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl p-6 shadow-sm"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={review.userAvatar}
-                    alt={review.userName}
-                    className="w-12 h-12 rounded-full"
-                  />
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {review.userName}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex">
-                        {<Rating rating={dummyStore.rating} />}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString("ar-SA")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <p className="mt-4 text-gray-600">{review.comment}</p>
-
-              <div className="flex items-center gap-4 mt-4">
-                <button className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
-                  <ThumbsUp className="w-4 h-4" />
-                  <span>({review.likes})</span>
-                </button>
-                <button className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700">
-                  <ThumbsDown className="w-4 h-4" />
-                  <span>({review.dislikes})</span>
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
     </div>
   );
 }

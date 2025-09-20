@@ -1,210 +1,125 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Star, Heart, ShoppingCart } from "lucide-react";
+import React from "react";
+import { Heart, ShoppingCart, Trash } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import Button from "../ui/Button";
-import Rating from "../ui/Rating";
-import { useState } from "react";
-
-type ProductType = "physical" | "digital" | "course";
-
-interface BaseProduct {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image?: string;
-  type: ProductType;
-  rating?: number;
-}
-
-interface PhysicalProduct extends BaseProduct {
-  type: "physical";
-  stock?: number;
-  weight?: number;
-  dimensions?: string;
-}
-
-interface DigitalProduct extends BaseProduct {
-  type: "digital";
-  fileSize?: string;
-  format?: string;
-  downloadLink?: string;
-  licenseKey?: string;
-}
-
-interface CourseProduct extends BaseProduct {
-  type: "course";
-  duration?: number;
-  lectures?: number;
-  level?: string;
-  instructor?: string;
-}
-
-type Product = PhysicalProduct | DigitalProduct | CourseProduct;
+import Link from "next/link";
+import { Product } from "@/context/CartContext";
 
 interface ProductCardProps {
   product: Product;
-  removeTopButtons: boolean;
 }
 
-const defaultImage =
-  "https://m.media-amazon.com/images/I/515gK1s2tSL._MCnd_AC_.jpg";
+export default function ProductCard({ product }: ProductCardProps) {
+  const { addToCart, removeFromCart, isInCart, getCartItemById } = useCart();
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3 },
-};
+  const cartItem = getCartItemById(product.id);
+  const isProductInCart = isInCart(product.id);
+  const isProductFavorite = isFavorite(product.id);
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  removeTopButtons = false,
-}) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("ar-SA", {
-      style: "currency",
-      currency: "SAR",
-    }).format(price);
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Add to cart logic here
-    console.log("Added to cart:", product.id);
+  console.log("cartItem", cartItem);
+  const handleAddToCart = () => {
+    addToCart(product);
   };
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    // Add to favorites logic here
-    console.log("Toggled favorite:", product.id, !isFavorite);
-  };
-
-  const renderProductDetails = () => {
-    switch (product.type) {
-      case "physical":
-        return (
-          <div className="text-gray-600 text-sm">
-            {product.stock && <p>المخزون المتوفر: {product.stock}</p>}
-            {product.dimensions && <p>الأبعاد: {product.dimensions}</p>}
-          </div>
-        );
-      case "digital":
-        return (
-          <div className="text-gray-600 text-sm">
-            {product.fileSize && <p>حجم الملف: {product.fileSize}</p>}
-            {product.format && <p>الصيغة: {product.format}</p>}
-          </div>
-        );
-      case "course":
-        return (
-          <div className="text-gray-600 text-sm">
-            {product.duration && <p>المدة: {product.duration} ساعة</p>}
-            {product.level && <p>المستوى: {product.level}</p>}
-            {product.instructor && <p>المدرب: {product.instructor}</p>}
-          </div>
-        );
+  const handleRemoveFromCart = () => {
+    if (cartItem) {
+      removeFromCart(cartItem.id);
     }
   };
 
+  const handleToggleFavorite = () => {
+    if (isProductFavorite) {
+      removeFromFavorites(product.id);
+    } else {
+      addToFavorites(product);
+    }
+  };
+
+  const discount =
+    product.priceAfterDiscount && product.price
+      ? Math.round(
+          ((product.price - product.priceAfterDiscount) / product.price) * 100
+        )
+      : 0;
+
   return (
-    <motion.div
-      className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
-      variants={fadeInUp}
-    >
-      <div className="relative">
-        {removeTopButtons ? null : (
-          <div className="absolute top-4 left-4 z-10 flex  gap-2">
-            <motion.button
-              className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center group hover:bg-purple-600 transition-all duration-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleAddToCart}
-              aria-label="إضافة إلى السلة"
-            >
-              <ShoppingCart className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors duration-300" />
-            </motion.button>
+    <div className="bg-white rounded-lg overflow-hidden">
+      <div className="relative group">
+        <Link href={`/products/${product.id}`}>
+          <img
+            src={product.thumbnail.url}
+            alt={product.name.ar}
+            className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
 
-            <motion.button
-              className={`w-10 h-10 rounded-full ${
-                isFavorite ? "bg-pink-500" : "bg-white"
-              } shadow-lg flex items-center justify-center group hover:bg-pink-500 transition-all duration-300`}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleToggleFavorite}
-              aria-label="إضافة إلى المفضلة"
-            >
-              <Heart
-                className={`w-5 h-5 ${
-                  isFavorite ? "text-white fill-current" : "text-pink-500"
-                } group-hover:text-white transition-colors duration-300`}
-              />
-            </motion.button>
+        {/* Discount Badge */}
+        {discount > 0 && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-sm font-medium px-2 py-1 rounded">
+            -{discount}%
           </div>
         )}
 
-        <div className="h-64">
-          {
-            // product.image
-            false ? (
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <img
-                src={defaultImage}
-                alt={product.name}
-                className="object-cover w-full h-full"
-              />
-            )
-          }
+        {/* Action Buttons */}
+        <div className="absolute top-2 left-2 flex flex-col gap-2">
+          <button
+            onClick={handleToggleFavorite}
+            className={`p-2 rounded-full ${
+              isProductFavorite
+                ? "bg-red-500 text-white"
+                : "bg-white text-gray-600"
+            } hover:scale-110 transition-all shadow-sm`}
+          >
+            <Heart
+              size={20}
+              fill={isProductFavorite ? "currentColor" : "none"}
+            />
+          </button>
         </div>
+      </div>
 
-        {product.type === "course" && (
-          <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
-            دورة تدريبية
+      <div className="p-4">
+        <Link href={`/products/${product.id}`}>
+          <h3 className="font-semibold mb-2 line-clamp-1">{product.name.ar}</h3>
+
+          <div className="flex items-center gap-2 mb-4">
+            <span className="font-bold text-purple-600">
+              {product.priceAfterDiscount || product.price} ﷼
+            </span>
+            {discount > 0 && (
+              <span className="text-sm text-gray-500 line-through">
+                {product.price} ﷼
+              </span>
+            )}
           </div>
+        </Link>
+
+        {!isProductInCart && (
+          <Button
+            onClick={handleAddToCart}
+            disabled={product.type === "physical" && (product.stock || 0) === 0}
+            size={"full"}
+          >
+            <ShoppingCart size={20} />
+            إضافة للسلة
+          </Button>
+        )}
+        {isProductInCart && (
+          <Button
+            variant={"destructive"}
+            onClick={handleRemoveFromCart}
+            title="إزالة من السلة"
+            size={"full"}
+          >
+            <Trash size={20} />
+            إزالة من السلة
+          </Button>
         )}
       </div>
-
-      <div className="p-6 flex flex-col flex-grow space-y-2">
-        <Rating rating={product.rating as number} />
-
-        <h3 className="text-xl font-semibold text-right truncate">
-          {product.name}
-        </h3>
-
-        {renderProductDetails()}
-
-        <div className="space-y-3">
-          <div className="flex justify-between items-center gap-2">
-            <Link href={`/products/${product.id}`}>
-              <Button variant={"secondary"} size={"md"}>
-                عرض التفاصيل
-              </Button>
-            </Link>{" "}
-            <div>
-              {product.originalPrice && (
-                <p className="text-gray-400 line-through text-sm">
-                  {formatPrice(product.originalPrice)}
-                </p>
-              )}
-              <p className="text-purple-600 font-bold text-xl">
-                {formatPrice(product.price)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
-};
-
-export default ProductCard;
+}

@@ -4,6 +4,7 @@ import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { FavoritesProvider } from "../context/FavoritesContext";
 
 export const metadata: Metadata = {
   title: "ماجيك ستور - متجر المنتجات ودورات",
@@ -19,15 +20,17 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <CartProvider>
-          <AuthProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              {children}
-              <Footer />
-            </div>
-          </AuthProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                {children}
+                <Footer />
+              </div>
+            </FavoritesProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

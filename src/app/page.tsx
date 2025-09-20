@@ -35,9 +35,12 @@ const staggerContainer = {
 export default function Home() {
   const { dummyProducts } = useCart();
 
-  const physicalProducts = dummyProducts.filter((p) => p.type === "physical");
-  const digitalProducts = dummyProducts.filter((p) => p.type === "digital");
-  const courseProducts = dummyProducts.filter((p) => p.type === "course");
+  const physicalProducts =
+    dummyProducts?.filter((p) => p.type === "physical") || [];
+  const digitalProducts =
+    dummyProducts?.filter((p) => p.type === "digital") || [];
+  const courseProducts =
+    dummyProducts?.filter((p) => p.type === "course") || [];
 
   return (
     <main className="min-h-screen bg-white">

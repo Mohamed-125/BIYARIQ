@@ -1,322 +1,251 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { apiFetch } from "@/lib/apiFetch";
+import { useAuth } from "./AuthContext";
+import { toast } from "sonner";
 
-// Define product types
-export type ProductType = "digital" | "physical" | "course";
+interface LocalizedText {
+  ar: string;
+  en: string;
+}
 
-// Define product base interface
-export interface BaseProduct {
+interface ProductImage {
+  url: string;
+  public_id: string;
   id: string;
-  name: string;
+}
+
+export interface Product {
+  id: string;
+  name: LocalizedText;
+  description: LocalizedText;
   price: number;
-  originalPrice?: number;
-  image: string;
-  quantity?: number;
-  rating: number;
+  priceAfterDiscount?: number;
+  thumbnail: { url: string; public_id: string };
+  images: ProductImage[];
+  type: "physical" | "digital" | "course";
+  category?: {
+    name: LocalizedText;
+  };
+  ratingAverage?: number;
+  ratingQuantity?: number;
+  stock?: number;
+  options?: {
+    colors?: {
+      name: LocalizedText;
+      values: string[];
+    };
+    sizes?: {
+      name: LocalizedText;
+      values: string[];
+    };
+  };
 }
 
-// Physical product
-export interface PhysicalProduct extends BaseProduct {
-  type: "physical";
-  weight?: number; // in kg
-  dimensions?: string; // e.g. "10x20x5 cm"
-  stock: number;
-}
+export type CartItem = { id: string; quantity: number; product: Product };
 
-// Digital product
-export interface DigitalProduct extends BaseProduct {
-  type: "digital";
-  fileSize?: string; // e.g. "500MB"
-  format?: string; // e.g. "PDF, MP3"
-  downloadLink?: string;
-  licenseKey?: string;
-}
-
-// Course product
-export interface CourseProduct extends BaseProduct {
-  type: "course";
-  duration: number; // in hours
-  lectures: number;
-  level: string; // e.g. "Beginner, Intermediate"
-  instructor: string;
-}
-
-// Union type
-export type Product = PhysicalProduct | DigitalProduct | CourseProduct;
-
-// Define cart context interface
 interface CartContextType {
-  items: Product[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  totalItems: number;
-  totalPrice: number;
-  digitalItems: Product[];
-  physicalItems: Product[];
-  courseItems: Product[];
-  addToWishlist: (productId: string) => void;
-  dummyProducts: Product[];
-  saveForLater: (productId: string) => void;
+  cartItems: CartItem[];
+  loading: boolean;
+  error: string | null;
+  addToCart: (
+    product: Product,
+    quantity?: number,
+    color?: string,
+    size?: string
+  ) => Promise<void>;
+  removeFromCart: (itemId: string) => Promise<void>;
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  isInCart: (id: string) => boolean;
+  getCartItemById: (id: string) => CartItem | undefined;
 }
 
-// Initialize cart state from localStorage if available
-const dummyProducts: Product[] = [
-  // Physical
-  {
-    id: "p1",
-    name: "Wireless Mouse",
-    price: 25,
-    originalPrice: 35,
-    rating: 4,
-    image:
-      "https://store-images.s-microsoft.com/image/apps.808.14492077886571533.be42f4bd-887b-4430-8ed0-622341b4d2b0.c8274c53-105e-478b-9f4b-41b8088210a3?q=90&w=512&h=768&mode=crop&format=jpg&background=%23FFFFFF",
-    type: "physical",
-    stock: 50,
-    weight: 0.2,
-    dimensions: "10x6x4 cm",
-  },
-  {
-    id: "p2",
-    name: "Bluetooth Headphones",
-    price: 80,
-    originalPrice: 100,
-    rating: 4,
-    image:
-      "https://static.vecteezy.com/system/resources/thumbnails/044/280/984/small_2x/stack-of-books-on-a-brown-background-concept-for-world-book-day-photo.jpg",
-    type: "physical",
-    stock: 30,
-    weight: 0.5,
-    dimensions: "20x15x8 cm",
-  },
-  {
-    id: "p3",
-    name: "Office Chair",
-    price: 150,
-    rating: 4,
-    originalPrice: 200,
-    image:
-      "https://www.have-clothes-will-travel.com/wp-content/uploads/2019/05/qtq80-7bsDUb.jpeg",
-    type: "physical",
-    stock: 10,
-    weight: 12,
-    dimensions: "70x70x110 cm",
-  },
-
-  // Digital
-  {
-    id: "d1",
-    name: "E-book: Learn JavaScript",
-    price: 15,
-    rating: 4,
-    type: "digital",
-    image:
-      "https://store-images.s-microsoft.com/image/apps.808.14492077886571533.be42f4bd-887b-4430-8ed0-622341b4d2b0.c8274c53-105e-478b-9f4b-41b8088210a3?q=90&w=512&h=768&mode=crop&format=jpg&background=%23FFFFFF",
-
-    fileSize: "5MB",
-    format: "PDF",
-    downloadLink: "/downloads/js-ebook.pdf",
-    licenseKey: "JS123-456",
-  },
-  {
-    id: "d2",
-    name: "Stock Photo Pack",
-    price: 25,
-    image:
-      "https://static.vecteezy.com/system/resources/thumbnails/044/280/984/small_2x/stack-of-books-on-a-brown-background-concept-for-world-book-day-photo.jpg",
-
-    type: "digital",
-    rating: 4,
-    fileSize: "500MB",
-    format: "JPEG",
-    downloadLink: "/downloads/stock-photos.zip",
-  },
-  {
-    id: "d3",
-    name: "Music Album",
-    image:
-      "https://www.have-clothes-will-travel.com/wp-content/uploads/2019/05/qtq80-7bsDUb.jpeg",
-
-    price: 10,
-    type: "digital",
-    rating: 3.5,
-    fileSize: "120MB",
-    format: "MP3",
-    downloadLink: "/downloads/album.zip",
-  },
-
-  // Courses
-  {
-    id: "c1",
-    name: "Web Development Bootcamp",
-    price: 200,
-    image:
-      "https://store-images.s-microsoft.com/image/apps.808.14492077886571533.be42f4bd-887b-4430-8ed0-622341b4d2b0.c8274c53-105e-478b-9f4b-41b8088210a3?q=90&w=512&h=768&mode=crop&format=jpg&background=%23FFFFFF",
-    type: "course",
-    duration: 40,
-    rating: 4,
-    lectures: 120,
-    level: "Beginner",
-    instructor: "John Doe",
-  },
-  {
-    id: "c2",
-    name: "Advanced React",
-    price: 150,
-    image:
-      "https://static.vecteezy.com/system/resources/thumbnails/044/280/984/small_2x/stack-of-books-on-a-brown-background-concept-for-world-book-day-photo.jpg",
-    type: "course",
-    duration: 25,
-    lectures: 80,
-    rating: 2.5,
-    level: "Advanced",
-    instructor: "Jane Smith",
-  },
-  {
-    id: "c3",
-    name: "UI/UX Design Fundamentals",
-    price: 100,
-    image:
-      "https://www.have-clothes-will-travel.com/wp-content/uploads/2019/05/qtq80-7bsDUb.jpeg",
-    type: "course",
-    duration: 20,
-    rating: 4.5,
-    lectures: 60,
-    level: "Intermediate",
-    instructor: "Emily Johnson",
-  },
-];
-
-// Create context with default values
 const CartContext = createContext<CartContextType>({
-  items: [],
-  addToCart: () => {},
-  removeFromCart: () => {},
-  updateQuantity: () => {},
-  clearCart: () => {},
-  totalItems: 0,
-  totalPrice: 0,
-  digitalItems: [],
-  physicalItems: [],
-  courseItems: [],
-  addToWishlist: () => {},
-  saveForLater: () => {},
-  dummyProducts,
+  cartItems: [],
+  loading: false,
+  error: null,
+  addToCart: async () => {},
+  removeFromCart: async () => {},
+  updateQuantity: async () => {},
+  clearCart: async () => {},
+  isInCart: () => false,
+  getCartItemById: () => undefined,
 });
 
-// Custom hook to use cart context
 export const useCart = () => useContext(CartContext);
 
-// Cart provider component
-export const CartProvider: React.FC<{ children: ReactNode }> = ({
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [items, setItems] = useState<Product[]>(dummyProducts);
+  const { user, loading: authLoading } = useAuth();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Add product to cart
-  const addToCart = (product: Product) => {
-    setItems((prevItems) => {
-      // Check if product already exists in cart
-      const existingItemIndex = prevItems.findIndex(
+  useEffect(() => {
+    if (!authLoading) fetchCartItems();
+  }, [user, authLoading]);
+
+  const fetchCartItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (user) {
+        const response = await apiFetch("/cart", { cache: "no-store" });
+        setCartItems(response.cart);
+      } else {
+        const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+        setCartItems(localCart);
+      }
+    } catch (err) {
+      setError("فشل تحميل سلة التسوق");
+      toast.error("فشل تحميل سلة التسوق");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addToCart = async (product: Product, quantity = 1) => {
+    try {
+      // Optimistic update
+      const newItem: CartItem = {
+        id: product.id,
+        quantity,
+        product,
+      };
+
+      const existingItemIndex = cartItems.findIndex(
         (item) => item.id === product.id
       );
+      const updatedItems = [...cartItems];
 
       if (existingItemIndex !== -1) {
-        // If product exists, update quantity
-        const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: (updatedItems[existingItemIndex].quantity || 1) + 1,
-        };
-        return updatedItems;
+        updatedItems[existingItemIndex].quantity += quantity;
       } else {
-        // If product doesn't exist, add it with quantity 1
-        return [...prevItems, { ...product, quantity: 1 }];
+        updatedItems.push(newItem);
       }
-    });
-  };
 
-  // Remove product from cart
-  const removeFromCart = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== productId));
-  };
+      setCartItems(updatedItems);
 
-  // Update product quantity
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
+      if (user) {
+        await apiFetch("/cart", {
+          method: "POST",
+          body: JSON.stringify({
+            productId: product.id,
+            quantity,
+          }),
+        });
+      } else {
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
+      }
+
+      toast.success("تمت الإضافة إلى سلة التسوق");
+    } catch (err) {
+      // Revert optimistic update
+      await fetchCartItems();
+      toast.error("فشل إضافة المنتج إلى سلة التسوق");
     }
-
-    setItems((prevItems) => {
-      return prevItems.map((item) => {
-        if (item.id === productId) {
-          return { ...item, quantity };
-        }
-        return item;
-      });
-    });
   };
 
-  // Clear cart
-  const clearCart = () => {
-    setItems([]);
+  const removeFromCart = async (itemId: string) => {
+    try {
+      // Optimistic update
+      const previousItems = [...cartItems];
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+
+      if (user) {
+        await apiFetch(`/cart/${itemId}`, {
+          method: "DELETE",
+        });
+      } else {
+        const updatedItems = cartItems.filter((item) => item.id !== itemId);
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
+      }
+
+      toast.success("تم إزالة المنتج من السلة");
+    } catch (err) {
+      // Revert optimistic update
+      setCartItems(previousItems);
+      toast.error("فشل إزالة المنتج من السلة");
+    }
   };
 
-  // Calculate total items in cart
-  const totalItems = items.reduce(
-    (total, item) => total + (item.quantity || 1),
-    0
-  );
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      if (quantity <= 0) {
+        await removeFromCart(itemId);
+        return;
+      }
 
-  // Calculate total price
-  const totalPrice = items.reduce(
-    (total, item) => total + item.price * (item.quantity || 1),
-    0
-  );
+      // Optimistic update
+      const previousItems = [...cartItems];
+      setCartItems((prev) =>
+        prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
+      );
 
-  // Filter items by type
-  const digitalItems = items.filter((item) => item.type === "digital");
-  const physicalItems = items.filter((item) => item.type === "physical");
-  const courseItems = items.filter((item) => item.type === "course");
+      if (user) {
+        await apiFetch(`/cart/${itemId}`, {
+          method: "PUT",
+          body: JSON.stringify({ quantity }),
+        });
+      } else {
+        const updatedItems = cartItems.map((item) =>
+          item.id === itemId ? { ...item, quantity } : item
+        );
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
+      }
 
-  // Add to wishlist
-  const addToWishlist = (productId: string) => {
-    // Implementation will be added later
-    console.log("Added to wishlist:", productId);
+      toast.success("تم تحديث الكمية");
+    } catch (err) {
+      // Revert optimistic update
+      setCartItems(previousItems);
+      toast.error("فشل تحديث الكمية");
+    }
   };
 
-  // Save for later
-  const saveForLater = (productId: string) => {
-    // Implementation will be added later
-    console.log("Saved for later:", productId);
+  const clearCart = async () => {
+    try {
+      // Optimistic update
+      const previousItems = [...cartItems];
+      setCartItems([]);
+
+      if (user) {
+        await apiFetch("/cart", { method: "DELETE" });
+      } else {
+        localStorage.removeItem("cart");
+      }
+
+      toast.success("تم مسح سلة التسوق");
+    } catch (err) {
+      // Revert optimistic update
+      setCartItems(previousItems);
+      toast.error("فشل مسح سلة التسوق");
+    }
   };
 
-  // Provide cart context to children
+  const isInCart = (id: string) => {
+    return cartItems.some((item) => item.id === id);
+  };
+
+  const getCartItemById = (id: string) => {
+    return cartItems.find((item) => item.id === id);
+  };
+
   return (
     <CartContext.Provider
       value={{
-        items,
+        cartItems,
+        loading,
+        error,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
-        totalItems,
-        totalPrice,
-        digitalItems,
-        physicalItems,
-        courseItems,
-        addToWishlist,
-        saveForLater,
-        dummyProducts,
+        isInCart,
+        getCartItemById,
       }}
     >
       {children}

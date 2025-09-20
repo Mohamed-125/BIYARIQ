@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Wallet, TrendingUp, Clock, ShoppingBag } from "lucide-react";
+import { Wallet, TrendingUp, Clock, ShoppingBag, Trophy, Users, Target } from "lucide-react";
 
 const data = [
   { name: "يناير", earnings: 4000 },
@@ -16,28 +16,40 @@ const data = [
 
 const stats = [
   {
-    title: "إجمالي الأرباح",
+    title: "العمولات الحالية",
     value: "12,500 ر.س",
     icon: Wallet,
     color: "bg-purple-100 text-purple-600",
   },
   {
-    title: "الأرباح المعلقة",
-    value: "2,300 ر.س",
-    icon: Clock,
+    title: "الطلبات المسوقة",
+    value: "156",
+    icon: ShoppingBag,
+    color: "bg-blue-100 text-blue-600",
+  },
+  {
+    title: "ترتيبك بين المسوقين",
+    value: "#5",
+    icon: Trophy,
     color: "bg-yellow-100 text-yellow-600",
   },
   {
-    title: "الأرباح القابلة للسحب",
-    value: "10,200 ر.س",
-    icon: TrendingUp,
+    title: "عدد الزيارات",
+    value: "2,845",
+    icon: Users,
     color: "bg-green-100 text-green-600",
   },
   {
-    title: "معدل التحويل",
+    title: "نسبة التحويل",
     value: "24%",
+    icon: Target,
+    color: "bg-red-100 text-red-600",
+  },
+  {
+    title: "الطلبات المؤكدة",
+    value: "89",
     icon: ShoppingBag,
-    color: "bg-blue-100 text-blue-600",
+    color: "bg-indigo-100 text-indigo-600",
   },
 ];
 

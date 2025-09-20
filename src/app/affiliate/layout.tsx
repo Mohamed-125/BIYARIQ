@@ -10,13 +10,23 @@ import {
   ShoppingCart,
   Wallet,
   ChevronDown,
+  BarChart2,
+  Trophy,
+  FileText,
+  HelpCircle,
+  Package,
 } from "lucide-react";
 
 const navigation = [
   {
-    name: "النظرة العامة",
+    name: "لوحة التحكم",
     href: "/affiliate",
     icon: LayoutDashboard,
+  },
+  {
+    name: "المنتجات",
+    href: "/affiliate/products",
+    icon: Package,
   },
   {
     name: "روابط التسويق",
@@ -24,14 +34,29 @@ const navigation = [
     icon: LinkIcon,
   },
   {
-    name: "الطلبات",
-    href: "/affiliate/orders",
-    icon: ShoppingCart,
-  },
-  {
     name: "المدفوعات",
     href: "/affiliate/balance",
     icon: Wallet,
+  },
+  {
+    name: "الإحصائيات",
+    href: "/affiliate/analytics",
+    icon: BarChart2,
+  },
+  {
+    name: "ترتيب المسوقين",
+    href: "/affiliate/top-affiliates",
+    icon: Trophy,
+  },
+  {
+    name: "التقارير",
+    href: "/affiliate/reports",
+    icon: FileText,
+  },
+  {
+    name: "الدعم الفني",
+    href: "/affiliate/support",
+    icon: HelpCircle,
   },
 ];
 

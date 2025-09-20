@@ -30,6 +30,27 @@ export default function AffiliateLinks() {
   const [showQR, setShowQR] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState<number | null>(null);
   const [copySuccess, setCopySuccess] = useState<number | null>(null);
+  const [links, setLinks] = useState(marketingLinks);
+
+  const handleDelete = async (linkId: number) => {
+    try {
+      setLinks(links.filter((link) => link.id !== linkId));
+    } catch (error) {
+      console.error("خطأ في حذف الرابط:", error);
+    }
+  };
+
+  const handleToggleStatus = async (linkId: number, newStatus: boolean) => {
+    try {
+      setLinks(
+        links.map((link) =>
+          link.id === linkId ? { ...link, active: newStatus } : link
+        )
+      );
+    } catch (error) {
+      console.error("خطأ في تحديث حالة الرابط:", error);
+    }
+  };
 
   const handleCopy = (url: string, id: number) => {
     navigator.clipboard.writeText(url);
