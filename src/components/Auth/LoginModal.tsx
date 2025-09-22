@@ -57,7 +57,6 @@ const LoginModal = ({ open, setOpen }: LoginModalProps) => {
 
   const handleLoginSuccess = async (token: string) => {
     try {
-      await login(token);
       toast.success("تم تسجيل الدخول بنجاح");
       handleClose();
     } catch (error) {
