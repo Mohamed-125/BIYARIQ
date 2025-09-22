@@ -47,8 +47,14 @@ const EmailLoginForm = ({
 
       if (password.length < 8) {
         newErrors.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
-      } else if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
-        newErrors.password = "كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، وحرف خاص";
+      } else if (
+        !hasUpperCase ||
+        !hasLowerCase ||
+        !hasNumber ||
+        !hasSpecialChar
+      ) {
+        newErrors.password =
+          "كلمة المرور يجب أن تحتوي على حرف كبير، حرف صغير، رقم، وحرف خاص";
       }
     }
 
@@ -75,10 +81,18 @@ const EmailLoginForm = ({
 
       await onSuccess(response.token);
     } catch (error) {
-      setErrors({
-        ...errors,
-        general: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-      });
+      if (error instanceof Error && error.message.includes("429")) {
+        setErrors({
+          ...errors,
+          general:
+            "العديد محاولات تسجيل الدخول الخاطئه حاول مجددا بعد 15 دقيقه",
+        });
+      } else {
+        setErrors({
+          ...errors,
+          general: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        });
+      }
     } finally {
       setLoading(false);
     }

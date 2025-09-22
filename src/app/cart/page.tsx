@@ -14,10 +14,9 @@ import Loading from "../../components/ui/Loading";
 export default function CartPage() {
   const { cartItems, loading, error, removeFromCart, updateQuantity } =
     useCart();
- 
 
   if (loading) {
-    return <Loading />; 
+    return <Loading />;
   }
 
   if (error) {
@@ -60,6 +59,7 @@ export default function CartPage() {
   );
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+    console.log(itemId);
     if (newQuantity >= 1) {
       await updateQuantity(itemId, newQuantity);
     }

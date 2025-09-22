@@ -5,6 +5,7 @@ import Footer from "../components/Footer/Footer";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "../context/FavoritesContext";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "ماجيك ستور - متجر المنتجات ودورات",
@@ -23,6 +24,8 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <FavoritesProvider>
+              {" "}
+              <Toaster position="top-right" richColors />
               <div className="flex flex-col min-h-screen">
                 <Header />
                 {children}

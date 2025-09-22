@@ -87,7 +87,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const [dummyProducts, setDummyProducts] = useState<Product[]>([]);
   useEffect(() => {
-
     if (!authLoading) fetchCartItems();
   }, [authLoading]);
 
@@ -134,15 +133,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       setCartItems(updatedItems);
 
       if (user) {
-        await apiFetch("/cart", {
+        const res = await apiFetch("/cart", {
           method: "POST",
           body: JSON.stringify({
             productId: product.id,
             quantity,
           }),
         });
+
+        console.log("res", res);
+
+        // بعد الإضافة من السيرفر، رجع اعمل fetch للكارت
+        await fetchCartItems();
       } else {
         localStorage.setItem("cart", JSON.stringify(updatedItems));
+
+        // بعد التحديث في localStorage، رجع اعمل fetch برضه (علشان التزامن)
+        await fetchCartItems();
       }
 
       toast.success("تمت الإضافة إلى سلة التسوق");
@@ -227,11 +234,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const isInCart = (id: string) => {
-    return cartItems.some((item) => item.id === id);
+    return cartItems.some((item) => item?.id === id || item?.product.id === id);
   };
 
   const getCartItemById = (id: string) => {
-    return cartItems.find((item) => item.id === id);
+    return cartItems.find((item) => item?.id === id || item?.product.id === id);
   };
 
   return (
