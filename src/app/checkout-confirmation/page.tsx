@@ -1,13 +1,22 @@
-"use client";
+ "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { apiFetch } from "@/lib/apiFetch";
-import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
-export default function CheckoutConfirmationPage() {
+export default function CheckoutConfirmation() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">جارٍ التحميل...</div>}>
+      <CheckoutConfirmationPage />
+    </Suspense>
+  );
+}
+
+
+export   function CheckoutConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const resourcePath = searchParams.get("resourcePath");
@@ -21,6 +30,7 @@ export default function CheckoutConfirmationPage() {
       setStatus("error");
       setMessage("معلومات الدفع غير صحيحة");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resourcePath]);
 
   const processPayment = async () => {
@@ -33,16 +43,13 @@ export default function CheckoutConfirmationPage() {
       if (response.success) {
         setStatus("success");
         setMessage("تم الدفع بنجاح");
-        
-        // Store order details in localStorage if available
+
         if (response.orderId) {
           localStorage.setItem("lastOrderId", response.orderId);
         }
-        
-        // Clear cart immediately
+
         localStorage.removeItem("cart");
-        
-        // Redirect to thank you page after showing success message
+
         setTimeout(() => {
           router.replace("/thank-you");
         }, 2000);
