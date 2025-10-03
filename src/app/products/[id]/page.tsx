@@ -16,6 +16,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
+import { useInView } from "react-intersection-observer";
 
 interface LocalizedText {
   ar: string;
@@ -26,6 +27,25 @@ interface ProductImage {
   url: string;
   public_id: string;
   _id: string;
+}
+
+interface Rating {
+  id: string;
+  comment: string;
+  rating: number;
+  commentedAt: string;
+  user: {
+    id: string;
+    username: string;
+    email: string;
+    photo?: { url: string } | null;
+  };
+}
+
+interface RatingPagination {
+  totalRatings: number;
+  currentPage: number;
+  totalPages: number;
 }
 
 interface Product {
@@ -66,16 +86,61 @@ export default function ProductDetails() {
   const [isInCart, setIsInCart] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [ratingsPagination, setRatingsPagination] = useState<RatingPagination>({
+    totalRatings: 0,
+    currentPage: 1,
+    totalPages: 1,
+  });
+  const [loadingRatings, setLoadingRatings] = useState(false);
+  const [hasMoreRatings, setHasMoreRatings] = useState(true);
+  const { ref: ratingRef, inView: ratingInView } = useInView();
 
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
 
+  const fetchRatings = async (page = 1, isNewSearch = false) => {
+    try {
+      if (isNewSearch) {
+        setLoadingRatings(true);
+      }
+
+      const response = await apiFetch(
+        `/ratings/product/${id}?page=${page}`
+      );
+      const { ratings: newRatings, paginate } = response;
+
+      setRatingsPagination(paginate);
+      setHasMoreRatings(page < (paginate?.totalPages || 1));
+
+      if (isNewSearch) {
+        setRatings(newRatings);
+      } else {
+        setRatings((prev) => [...prev, ...newRatings]);
+      }
+    } catch (err) {
+      console.error("Error fetching ratings:", err);
+    } finally {
+      setLoadingRatings(false);
+    }
+  };
+
   useEffect(() => {
     fetchProduct();
     checkCartStatus();
     checkFavoriteStatus();
+    fetchRatings(1, true);
   }, [id]);
+
+  useEffect(() => {
+    if (ratingInView && hasMoreRatings && !loadingRatings) {
+      const nextPage = ratingsPagination.currentPage + 1;
+      if (nextPage <= ratingsPagination.totalPages) {
+        fetchRatings(nextPage);
+      }
+    }
+  }, [ratingInView, hasMoreRatings, loadingRatings, ratingsPagination]);
 
   const fetchProduct = async () => {
     try {
@@ -409,6 +474,76 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
+
+      {/* Ratings Section */}
+      <div className="bg-white rounded-xl p-6 shadow-sm mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            التقييمات والمراجعات
+          </h2>
+          <div className="flex items-center gap-2">
+            <Rating rating={product.ratingAverage || 0} />
+          </div>
+        </div>
+
+        {/* Ratings List */}
+        <div className="space-y-6">
+          {ratings.map((rating) => (
+            <motion.div
+              key={rating.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="border-b border-gray-100 pb-6 last:border-0"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={rating.user.photo?.url || "https://static.vecteezy.com/system/resources/thumbnails/036/280/650/small_2x/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg"}
+                    alt={rating.user.username}
+                    className="w-12 h-12 rounded-full object-cover border"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {rating.user.username}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(rating.commentedAt).toLocaleDateString(
+                        "ar-SA",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Rating rating={rating.rating} />
+              </div>
+              <p className="mt-3 text-gray-700 leading-relaxed">
+                {rating.comment}
+              </p>
+            </motion.div>
+          ))}
+
+          {/* Loading More */}
+          <div ref={ratingRef} className="h-10 w-full">
+            {loadingRatings && (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            )}
+          </div>
+
+          {/* No Ratings */}
+          {!loadingRatings && ratings.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">لا توجد تقييمات بعد</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Share Popup */}
       <SharePopup open={showSharePopup} setOpen={setShowSharePopup} />
     </div>

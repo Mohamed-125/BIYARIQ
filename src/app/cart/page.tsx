@@ -144,7 +144,7 @@ export default function CartPage() {
             </div>
           </div>
           <Button className="w-full" asChild>
-            <Link href="/checkout">متابعة الشراء</Link>
+            <Link href="/checkout/payment">متابعة الشراء</Link>
           </Button>
         </div>
       </div>
